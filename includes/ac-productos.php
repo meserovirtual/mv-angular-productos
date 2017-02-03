@@ -64,6 +64,9 @@ class Productos extends Main
     pr.precio_id,
     pr.precio_tipo_id,
     pr.precio,
+    ph.horario_id,
+    ph.hora_desde,
+    ph.hora_hasta,
     f.producto_foto_id,
     f.main,
     f.nombre nombreFoto,
@@ -79,6 +82,8 @@ FROM
         LEFT JOIN
     precios pr ON p.producto_id = pr.producto_id
         LEFT JOIN
+    precios_horario ph ON pr.precio_id = ph.precio_id
+        LEFT JOIN
     productos_fotos f ON p.producto_id = f.producto_id
         LEFT JOIN
     productos_kits ps ON p.producto_id = ps.parent_id
@@ -89,8 +94,7 @@ FROM
 GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
 p.vendidos , p.destacado , p.producto_tipo , p.en_slider , p.en_oferta , c.categoria_id ,
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
-pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido
-;');
+pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido;');
 
 
         $final = array();
@@ -159,7 +163,10 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
                     $final[$row['producto_id']]['precios'][] = array(
                         'precio_id' => $row['precio_id'],
                         'precio_tipo_id' => $row['precio_tipo_id'],
-                        'precio' => $row['precio']
+                        'precio' => $row['precio'],
+                        'horario_id' => $row['horario_id'],
+                        'hora_desde' => $row['hora_desde'],
+                        'hora_hasta' => $row['hora_hasta']
                     );
 
                     $have_pre = true;
@@ -169,7 +176,10 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
                     array_push($final[$row['producto_id']]['precios'], array(
                         'precio_id' => $row['precio_id'],
                         'precio_tipo_id' => $row['precio_tipo_id'],
-                        'precio' => $row['precio']
+                        'precio' => $row['precio'],
+                        'horario_id' => $row['horario_id'],
+                        'hora_desde' => $row['hora_desde'],
+                        'hora_hasta' => $row['hora_hasta']
                     ));
                 }
             }
@@ -276,6 +286,16 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
     }
 
     /**
+     *
+     */
+    function getProductosTipos()
+    {
+        $db = self::$instance->db;
+        $results = $db->rawQuery('SELECT producto_tipo_id, nombre, disponible_para_venta, control_stock, compuesto, status FROM productos_tipo;');
+        echo json_encode($results);
+    }
+
+    /**
      * @description Crea un producto, sus fotos, precios y le asigna las categorias
      * @param $product
      */
@@ -295,11 +315,8 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
             return;
         }
 
-
         $db = self::$instance->db;
-
         $db->startTransaction();
-
 
         $data = array(
             'nombre' => $product_decoded->nombre,
@@ -317,7 +334,7 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
 
         $result = $db->insert('productos', $data);
         if ($result > -1) {
-
+            /*
             foreach ($product_decoded->precios as $precio) {
                 if (!self::createPrecios($precio, $result, $db)) {
                     $db->rollback();
@@ -326,6 +343,7 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
                     return;
                 }
             }
+            */
             foreach ($product_decoded->categorias as $categoria) {
                 if (!self::createCategorias($categoria, $result, $db)) {
                     $db->rollback();
@@ -393,6 +411,62 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
     }
 
     /**
+     * @description Creo el precio por hora
+     * @param $precio_id
+     * @param $horario
+     * @param $db
+     * @return bool
+     */
+    function createPrecioPorHorario($params)
+    {
+        $db = self::$instance->db;
+        $product_decoded = self::checkProducto(json_decode($params["producto"]));
+        $success = true;
+        $db->startTransaction();
+
+        foreach ($product_decoded->precios as $precio) {
+            $precio_decoded = self::checkPrecios($precio);
+
+            $data = array(
+                'precio_tipo_id' => $precio_decoded->precio_tipo_id,
+                'producto_id' => $product_decoded->producto_id,
+                'precio' => $precio_decoded->precio
+            );
+            $precio_id = $db->insert('precios', $data);
+
+            if($precio_id > -1){
+                $horario_decoded = self::checkPrecioHorario($precio);
+
+                $data = array(
+                    'precio_id' => $precio_id,
+                    'hora_desde' => $horario_decoded->hora_desde,
+                    'hora_hasta' => $horario_decoded->hora_hasta
+                );
+                $horario_id = $db->insert('precios_horario', $data);
+
+                if($horario_id > -1) {
+                    $db->commit();
+                    header('HTTP/1.0 200 Ok');
+                    //echo json_encode($horario_id);
+                } else {
+                    $db->rollback();
+                    header('HTTP/1.0 500 Internal Server Error');
+                    $success = false;
+                    echo $db->getLastError();
+                }
+            } else {
+                $db->rollback();
+                header('HTTP/1.0 500 Internal Server Error');
+                $success = false;
+                echo $db->getLastError();
+            }
+        }
+
+        return $success;
+
+    }
+
+    /**
      * @description Crea la relación entre un producto y una categoría
      * @param $categoria
      * @param $producto_id
@@ -408,6 +482,59 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
 
         $cat = $db->insert('productos_categorias', $data);
         return ($cat > -1) ? true : false;
+    }
+
+    /**
+     * @param $params
+     */
+    function createCategoria($params)
+    {
+        $db = self::$instance->db;
+        $categoria_decoded = self::checkCategoria(json_decode($params["categoria"]));
+        $error = false;
+        $message = '';
+
+        $SQL = 'Select categoria_id from categorias where nombre ="' . $categoria_decoded->nombre . '"';
+        $db->rawQuery($SQL);
+
+        if ($db->count > 0) {
+            //header('HTTP/1.0 500 Internal Server Error');
+            //echo 'Existe una categoria con ese nombre';
+            //return;
+            $message = 'Existe una categoria con ese nombre';
+            $error = true;
+        }
+
+        if(!$error) {
+            $db = self::$instance->db;
+            $db->startTransaction();
+            $categoria_decoded = self::checkCategoria(json_decode($params["categoria"]));
+
+            $data = array(
+                'nombre' => $categoria_decoded->nombre,
+                'parent_id' => $categoria_decoded->parent_id,
+                'status' => $categoria_decoded->status
+            );
+
+            $result = $db->insert('categorias', $data);
+            if ($result > -1) {
+                $db->commit();
+                header('HTTP/1.0 200 Ok');
+                //echo json_encode($result);
+                $message = 'La operación se realizo satisfactoriamente';
+                $error = false;
+            } else {
+                $db->rollback();
+                //header('HTTP/1.0 500 Internal Server Error');
+                //echo $db->getLastError();
+                $db->getLastError();
+                $message = 'Error guardando el dato';
+                $error = true;
+            }
+        }
+
+        echo json_encode(['error' => $error, 'message' => $message]);
+
     }
 
     /**
@@ -467,11 +594,80 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
     }
 
     /**
+     * @param $params
+     */
+    function createProductoTipo($params)
+    {
+        $db = self::$instance->db;
+        $producto_tipo_decoded = self::checkProductoTipo(json_decode($params["productoTipo"]));
+        $error = false;
+        $message = '';
+
+        $SQL = 'Select producto_tipo_id from productos_tipo where nombre ="' . $producto_tipo_decoded->nombre . '"';
+        $db->rawQuery($SQL);
+
+        if ($db->count > 0) {
+            //header('HTTP/1.0 500 Internal Server Error');
+            //echo 'Existe una categoria con ese nombre';
+            //return;
+            $message = 'Existe un Tipo de Producto con ese nombre';
+            $error = true;
+        }
+
+        if(!$error) {
+            $db = self::$instance->db;
+            $db->startTransaction();
+            $producto_tipo_decoded = self::checkProductoTipo(json_decode($params["productoTipo"]));
+
+            $data = array(
+                'nombre' => $producto_tipo_decoded->nombre,
+                'disponible_para_venta' => $producto_tipo_decoded->disponible_para_venta,
+                'control_stock' => $producto_tipo_decoded->control_stock,
+                'compuesto' => $producto_tipo_decoded->compuesto,
+                'status' => $producto_tipo_decoded->status,
+            );
+
+            $result = $db->insert('productos_tipo', $data);
+            if ($result > -1) {
+                $db->commit();
+                header('HTTP/1.0 200 Ok');
+                //echo json_encode($result);
+                $message = 'La operación se realizo satisfactoriamente';
+                $error = false;
+            } else {
+                $db->rollback();
+                //header('HTTP/1.0 500 Internal Server Error');
+                //echo $db->getLastError();
+                $db->getLastError();
+                $message = 'Error guardando el dato';
+                $error = true;
+            }
+        }
+
+        echo json_encode(['error' => $error, 'message' => $message]);
+
+    }
+
+    /**
      * @description Modifica un producto, sus fotos, precios y le asigna las categorias
      * @param $product
      */
     function updateProducto($params)
     {
+        $db = self::$instance->db;
+        $product_decoded = self::checkProducto(json_decode($params["producto"]));
+
+        $SQL = 'Select producto_id from productos where nombre ="' . $product_decoded->nombre . '" AND producto_id != "' . $product_decoded->producto_id . '"';
+        $db->rawQuery($SQL);
+
+        if ($db->count > 0) {
+            header('HTTP/1.0 500 Internal Server Error');
+            echo 'Existe un producto con ese nombre';
+            return;
+            //$resultado = array('success'=>false, 'message'=>'');
+            //return json_encode($resultado);
+        }
+
         $db = self::$instance->db;
         $db->startTransaction();
         $product_decoded = self::checkProducto(json_decode($params["producto"]));
@@ -494,9 +690,15 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
 
         $result = $db->update('productos', $data);
 
+        /*
+        foreach ($product_decoded->precios as $precio) {
+            $db->where('precio_id', $precio->precio_id);
+            $db->delete('precios_horario');
+        }
 
         $db->where('producto_id', $product_decoded->producto_id);
         $db->delete('precios');
+        */
 
         $db->where('producto_id', $product_decoded->producto_id);
         $db->delete('productos_fotos');
@@ -511,7 +713,7 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
         $db->delete('productos_proveedores');
 
         if ($result) {
-
+            /*
             foreach ($product_decoded->precios as $precio) {
                 if (!self::createPrecios($precio, $product_decoded->producto_id, $db)) {
                     $db->rollback();
@@ -520,6 +722,7 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
                     return;
                 }
             }
+            */
             foreach ($product_decoded->categorias as $categoria) {
                 if (!self::createCategorias($categoria, $product_decoded->producto_id, $db)) {
                     $db->rollback();
@@ -565,6 +768,239 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
             $db->rollback();
             header('HTTP/1.0 500 Internal Server Error');
             echo $db->getLastError();
+        }
+    }
+
+    /**
+     * @param $params
+     * @return bool
+     */
+    function updatePrecioPorHorario($params)
+    {
+        $db = self::$instance->db;
+        $product_decoded = self::checkProducto(json_decode($params["producto"]));
+        $success = true;
+        $db->startTransaction();
+
+        foreach ($product_decoded->precios as $precio) {
+            $precio_decoded = self::checkPrecios($precio);
+
+            $db->where('precio_id', $precio->precio_id);
+            $data = array(
+                'precio_tipo_id' => $precio_decoded->precio_tipo_id,
+                'producto_id' => $product_decoded->producto_id,
+                'precio' => $precio_decoded->precio
+            );
+
+            $result = $db->update('precios', $data);
+            if($result){
+                $horario_decoded = self::checkPrecioHorario($precio);
+
+                $db->where('horario_id', $precio->horario_id);
+                $data = array(
+                    'precio_id' => $precio->precio_id,
+                    'hora_desde' => $horario_decoded->hora_desde,
+                    'hora_hasta' => $horario_decoded->hora_hasta
+                );
+                $result = $db->update('precios_horario', $data);
+
+                if($result) {
+                    $db->commit();
+                    header('HTTP/1.0 200 Ok');
+                    //echo json_encode($horario_id);
+                } else {
+                    $db->rollback();
+                    header('HTTP/1.0 500 Internal Server Error');
+                    $success = false;
+                    echo $db->getLastError();
+                }
+            } else {
+                $db->rollback();
+                header('HTTP/1.0 500 Internal Server Error');
+                $success = false;
+                echo $db->getLastError();
+            }
+        }
+
+        return $success;
+
+    }
+
+    /**
+     * @param $params
+     */
+    function updateCategoria($params)
+    {
+        $db = self::$instance->db;
+        $categoria_decoded = self::checkCategoria(json_decode($params["categoria"]));
+        $error = false;
+        $message = '';
+
+        $SQL = 'Select categoria_id from categorias where nombre ="' . $categoria_decoded->nombre . '" AND categoria_id != "' . $categoria_decoded->categoria_id . '"';
+        $db->rawQuery($SQL);
+
+        if ($db->count > 0) {
+            //header('HTTP/1.0 500 Internal Server Error');
+            //echo 'Existe una sucursal con ese nombre';
+            //return;
+            $message = 'Existe una categoria con ese nombre';
+            $error = true;
+        }
+
+        if(!$error) {
+            $db = self::$instance->db;
+            $db->startTransaction();
+            $categoria_decoded = self::checkCategoria(json_decode($params["categoria"]));
+
+            $db->where('categoria_id', $categoria_decoded->categoria_id);
+            $data = array(
+                'nombre' => $categoria_decoded->nombre,
+                'parent_id' => $categoria_decoded->parent_id,
+                'status' => $categoria_decoded->status
+            );
+
+            $result = $db->update('categorias', $data);
+            if ($result) {
+                $db->commit();
+                header('HTTP/1.0 200 Ok');
+                //echo json_encode($result);
+                $message = 'La operación se realizo satisfactoriamente';
+                $error = false;
+            } else {
+                $db->rollback();
+                //header('HTTP/1.0 500 Internal Server Error');
+                //echo $db->getLastError();
+                $db->getLastError();
+                $message = 'Error guardando el dato';
+                $error = true;
+            }
+        }
+
+        echo json_encode(['error' => $error, 'message' => $message]);
+
+    }
+
+    /**
+     * @param $params
+     */
+    function updateProductoTipo($params)
+    {
+        $db = self::$instance->db;
+        $producto_tipo_decoded = self::checkProductoTipo(json_decode($params["productoTipo"]));
+        $error = false;
+        $message = '';
+
+        $SQL = 'Select producto_tipo_id from productos_tipo where nombre ="' . $producto_tipo_decoded->nombre . '" AND producto_tipo_id != "' . $producto_tipo_decoded->producto_tipo_id . '"';
+        $db->rawQuery($SQL);
+
+        if ($db->count > 0) {
+            //header('HTTP/1.0 500 Internal Server Error');
+            //echo 'Existe una sucursal con ese nombre';
+            //return;
+            $message = 'Existe un Tipo de Producto con ese nombre';
+            $error = true;
+        }
+
+        if(!$error) {
+            $db = self::$instance->db;
+            $db->startTransaction();
+            $producto_tipo_decoded = self::checkProductoTipo(json_decode($params["productoTipo"]));
+
+            $db->where('producto_tipo_id', $producto_tipo_decoded->producto_tipo_id);
+            $data = array(
+                'nombre' => $producto_tipo_decoded->nombre,
+                'disponible_para_venta' => $producto_tipo_decoded->disponible_para_venta,
+                'control_stock' => $producto_tipo_decoded->control_stock,
+                'compuesto' => $producto_tipo_decoded->compuesto,
+                'status' => $producto_tipo_decoded->status
+            );
+
+            $result = $db->update('productos_tipo', $data);
+            if ($result) {
+                $db->commit();
+                header('HTTP/1.0 200 Ok');
+                //echo json_encode($result);
+                $message = 'La operación se realizo satisfactoriamente';
+                $error = false;
+            } else {
+                $db->rollback();
+                //header('HTTP/1.0 500 Internal Server Error');
+                //echo $db->getLastError();
+                $db->getLastError();
+                $message = 'Error guardando el dato';
+                $error = true;
+            }
+        }
+
+        echo json_encode(['error' => $error, 'message' => $message]);
+
+    }
+
+    function removeProducto($params)
+    {
+        $db = self::$instance->db;
+        $db->startTransaction();
+
+        //borro las fotos
+        $db->where("producto_id", $params["producto_id"]);
+        $result = $db->delete('productos_fotos');
+
+        //borro precios
+        $db->where("producto_id", $params["producto_id"]);
+        $result = $db->delete('precios');
+
+        //borro los kit de un producto
+        $db->where("parent_id", $params["producto_id"]);
+        $result = $db->delete('productos_kits');
+
+        //borro productos
+        $db->where("producto_id", $params["producto_id"]);
+        $result = $db->delete('productos');
+
+        if ($result) {
+            $db->commit();
+            header('HTTP/1.0 200 Ok');
+            echo json_encode($result);
+        } else {
+            $db->rollback();
+            header('HTTP/1.0 500 Internal Server Error');
+            echo $db->getLastError();
+        }
+    }
+
+
+
+    /**
+     * @param $params
+     */
+    function removeCategoria($params)
+    {
+        $db = self::$instance->db;
+
+        $db->where("categoria_id", $params["categoria_id"]);
+        $results = $db->delete('categorias');
+
+        if ($results) {
+            echo json_encode(1);
+        } else {
+            echo json_encode(-1);
+        }
+    }
+
+    /**
+     * @param $params
+     */
+    function removeProductoTipo($params)
+    {
+        $db = self::$instance->db;
+
+        $db->where("producto_tipo_id", $params["producto_tipo_id"]);
+        $results = $db->delete('productos_tipo');
+
+        if ($results) {
+            echo json_encode(1);
+        } else {
+            echo json_encode(-1);
         }
     }
 
@@ -660,6 +1096,18 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
     }
 
     /**
+     * @param $precio
+     */
+    function checkPrecioHorario($precio)
+    {
+        $precio->precio_id = (!array_key_exists("precio_id", $precio)) ? 0 : $precio->precio_id;
+        $precio->hora_desde = (!array_key_exists("hora_desde", $precio)) ? '00:00:00' : $precio->hora_desde;
+        $precio->hora_hasta = (!array_key_exists("hora_hasta", $precio)) ? '00:00:00' : $precio->hora_hasta;
+
+        return $precio;
+    }
+
+    /**
      * @description Verifica todos los campos de categoria del producto para que existan
      * @param $categorias
      * @return mixed
@@ -683,6 +1131,7 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
     {
         $categoria->nombre = (!array_key_exists("nombre", $categoria)) ? '' : $categoria->nombre;
         $categoria->parent_id = (!array_key_exists("parent_id", $categoria)) ? -1 : $categoria->parent_id;
+        $categoria->status = (!array_key_exists("status", $categoria)) ? 0 : $categoria->status;
 
         return $categoria;
     }
@@ -722,6 +1171,21 @@ pr.precio, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apell
 
         return $detalle;
     }
+
+    /**
+     * @param $productoTipo
+     */
+    function checkProductoTipo($productoTipo)
+    {
+        $productoTipo->nombre = (!array_key_exists("nombre", $productoTipo)) ? '' : $productoTipo->nombre;
+        $productoTipo->disponible_para_venta = (!array_key_exists("disponible_para_venta", $productoTipo)) ? 0 : $productoTipo->disponible_para_venta;
+        $productoTipo->control_stock = (!array_key_exists("control_stock", $productoTipo)) ? 0 : $productoTipo->control_stock;
+        $productoTipo->compuesto = (!array_key_exists("compuesto", $productoTipo)) ? 0 : $productoTipo->compuesto;
+        $productoTipo->status = (!array_key_exists("status", $productoTipo)) ? 0 : $productoTipo->status;
+
+        return $productoTipo;
+    }
+
 }
 
 

@@ -5,7 +5,7 @@
     var currentScriptPath = scripts[scripts.length - 1].src;
 
     if (currentScriptPath.length == 0) {
-        currentScriptPath = window.installPath + '/ac-angular-productos/includes/ac-productos.php';
+        currentScriptPath = window.installPath + '/mv-angular-productos/includes/ac-productos.php';
     }
 
     angular.module('acProductos', [])
@@ -15,6 +15,8 @@
         .service('CategoryVars', CategoryVars)
         .factory('CartService', CartService)
         .service('CartVars', CartVars)
+        .factory('ProductTypeService', ProductTypeService)
+        .service('ProductTypeVars', ProductTypeVars)
     ;
 
 
@@ -32,11 +34,14 @@
         service.getByCategoria = getByCategoria;
 
         service.create = create;
+        service.createPrecioPorHorario = createPrecioPorHorario;
 
         service.update = update;
+        service.updatePrecioPorHorario = updatePrecioPorHorario;
 
         service.remove = remove;
         service.save = save;
+        service.savePrecioPorHorario = savePrecioPorHorario;
 
         return service;
 
@@ -55,6 +60,22 @@
                 deferred.resolve(update(producto));
             } else {
                 deferred.resolve(create(producto));
+            }
+            return deferred.promise;
+        }
+
+        /**
+         * Función que determina si es un update o un create
+         * @param producto
+         * @returns {*}
+         */
+        function savePrecioPorHorario(producto) {
+            var deferred = $q.defer();
+
+            if (producto.precios[0].precio_id != undefined) {
+                deferred.resolve(updatePrecioPorHorario(producto));
+            } else {
+                deferred.resolve(createPrecioPorHorario(producto));
             }
             return deferred.promise;
         }
@@ -90,14 +111,19 @@
                 .then(function (response) {
 
                         for (var i = 0; i < response.data.length; i++) {
-                            response.data[i].precios[0].precio = parseFloat(response.data[i].precios[0].precio);
-                            response.data[i].precios[1].precio = parseFloat(response.data[i].precios[1].precio);
-                            response.data[i].precios[2].precio = parseFloat(response.data[i].precios[2].precio);
-                            response.data[i].precios.sort(function (a, b) {
-                                // Turn your strings into dates, and then subtract them
-                                // to get a value that is either negative, positive, or zero.
-                                return a.precio_tipo_id - b.precio_tipo_id;
-                            });
+                            if(response.data[i].precios !== undefined && response.data[i].precios.length > 0) {
+                                for(var j=0; j < response.data[i].precios.length; j++){
+                                    response.data[i].precios[j].precio = parseFloat(response.data[i].precios[j].precio);
+                                }
+                                //response.data[i].precios[0].precio = parseFloat(response.data[i].precios[0].precio);
+                                //response.data[i].precios[1].precio = parseFloat(response.data[i].precios[1].precio);
+                                //response.data[i].precios[2].precio = parseFloat(response.data[i].precios[2].precio);
+                                response.data[i].precios.sort(function (a, b) {
+                                    // Turn your strings into dates, and then subtract them
+                                    // to get a value that is either negative, positive, or zero.
+                                    return a.precio_tipo_id - b.precio_tipo_id;
+                                });
+                            }
                             response.data[i].pto_repo = parseFloat(response.data[i].pto_repo);
                             response.data[i].iva = parseFloat(response.data[i].iva);
                             response.data[i].status = '' + response.data[i].status;
@@ -215,6 +241,26 @@
                 });
         }
 
+        /**
+         *
+         * @param producto
+         * @returns {*}
+         */
+        function createPrecioPorHorario(producto) {
+            return $http.post(url,
+                {
+                    'function': 'createPrecioPorHorario',
+                    'producto': JSON.stringify(producto)
+                })
+                .then(function (response) {
+                    ProductVars.clearCache = true;
+                    return response.data;
+                })
+                .catch(function (response) {
+                    ProductVars.clearCache = true;
+                    ErrorHandler(response)
+                });
+        }
 
         /** @name: update
          * @param producto
@@ -224,6 +270,22 @@
             return $http.post(url,
                 {
                     'function': 'updateProducto',
+                    'producto': JSON.stringify(producto)
+                })
+                .then(function (response) {
+                    ProductVars.clearCache = true;
+                    return response.data;
+                })
+                .catch(function (response) {
+                    ProductVars.clearCache = true;
+                    ErrorHandler(response.data)
+                });
+        }
+
+        function updatePrecioPorHorario(producto) {
+            return $http.post(url,
+                {
+                    'function': 'updatePrecioPorHorario',
                     'producto': JSON.stringify(producto)
                 })
                 .then(function (response) {
@@ -272,11 +334,9 @@
         service.getByParams = getByParams;
 
         service.create = create;
-
         service.update = update;
-
         service.remove = remove;
-
+        service.save = save;
 
         service.goToPagina = goToPagina;
         service.next = next;
@@ -348,7 +408,10 @@
          */
         function remove(categoria_id, callback) {
             return $http.post(url,
-                {function: 'removeCategoria', 'categoria_id': categoria_id})
+                {
+                    'function': 'removeCategoria',
+                    'categoria_id': categoria_id
+                })
                 .success(function (data) {
                     //console.log(data);
                     if (data !== 'false') {
@@ -361,47 +424,56 @@
                 })
         }
 
+        function save(categoria) {
+            var deferred = $q.defer();
+
+            if (categoria.categoria_id != undefined) {
+                deferred.resolve(update(categoria));
+            } else {
+                deferred.resolve(create(categoria));
+            }
+            return deferred.promise;
+        }
+
         /**
          * @description: Crea un categoria.
          * @param categoria
-         * @param callback
          * @returns {*}
          */
-        function create(categoria, callback) {
-
+        function create(categoria) {
             return $http.post(url,
                 {
                     'function': 'createCategoria',
                     'categoria': JSON.stringify(categoria)
                 })
-                .success(function (data) {
+                .then(function (response) {
                     CategoryVars.clearCache = true;
-                    callback(data);
+                    return response.data;
                 })
-                .error(function (data) {
+                .catch(function (response) {
                     CategoryVars.clearCache = true;
-                    callback(data);
+                    ErrorHandler(response);
                 });
         }
 
 
         /** @name: update
          * @param categoria
-         * @param callback
          * @description: Realiza update al categoria.
          */
-        function update(categoria, callback) {
+        function update(categoria) {
             return $http.post(url,
                 {
                     'function': 'updateCategoria',
                     'categoria': JSON.stringify(categoria)
                 })
-                .success(function (data) {
+                .then(function (response) {
                     CategoryVars.clearCache = true;
-                    callback(data);
+                    return response.data;
                 })
-                .error(function (data) {
-                    callback(data);
+                .catch(function (response) {
+                    CategoryVars.clearCache = true;
+                    ErrorHandler(response);
                 });
         }
 
@@ -969,5 +1041,265 @@
         };
 
     }
+
+
+
+
+    ProductTypeService.$inject = ['$http', 'ProductTypeVars', '$cacheFactory', 'AcUtils', 'AcUtilsGlobals', 'ErrorHandler', '$q'];
+    function ProductTypeService($http, ProductTypeVars, $cacheFactory, AcUtils, AcUtilsGlobals, ErrorHandler, $q) {
+        //Variables
+        var service = {};
+
+        var url = currentScriptPath.replace('ac-productos.js', '/includes/ac-productos.php');
+
+        //Function declarations
+        service.get = get;
+
+        service.create = create;
+        service.update = update;
+        service.remove = remove;
+        service.save = save;
+
+        service.goToPagina = goToPagina;
+        service.next = next;
+        service.prev = prev;
+
+        return service;
+
+        //Functions
+        /**
+         * @description Obtiene todos los tipos de productos
+         * @param callback
+         * @returns {*}
+         */
+        function get() {
+            var urlGet = url + '?function=getProductosTipos';
+            var $httpDefaultCache = $cacheFactory.get('$http');
+            var cachedData = [];
+            AcUtilsGlobals.startWaiting();
+
+            // Verifica si existe el cache de categorias
+            if ($httpDefaultCache.get(urlGet) != undefined) {
+                if (ProductTypeVars.clearCache) {
+                    $httpDefaultCache.remove(urlGet);
+                }
+                else {
+                    var deferred = $q.defer();
+                    cachedData = $httpDefaultCache.get(urlGet);
+                    deferred.resolve(cachedData);
+                    AcUtilsGlobals.stopWaiting();
+                    return deferred.promise;
+                }
+            }
+
+            return $http.get(urlGet, {cache: true})
+                .then(function (response) {
+                    $httpDefaultCache.put(urlGet, response.data);
+                    ProductTypeVars.clearCache = false;
+                    ProductTypeVars.paginas = (response.data.length % ProductTypeVars.paginacion == 0) ? parseInt(response.data.length / ProductTypeVars.paginacion) : parseInt(response.data.length / ProductTypeVars.paginacion) + 1;
+                    AcUtilsGlobals.stopWaiting();
+                    return response.data;
+                })
+                .catch(function (response) {
+                    ProductTypeVars.clearCache = true;
+                    AcUtilsGlobals.stopWaiting();
+                    ErrorHandler(response);
+                })
+        }
+
+
+        /** @name: remove
+         * @param producto_tipo_id
+         * @param callback
+         * @description: Elimina el tipo de producto seleccionado
+         */
+        function remove(producto_tipo_id, callback) {
+            return $http.post(url,
+                {
+                    'function': 'removeProductoTipo',
+                    'producto_tipo_id': producto_tipo_id
+                })
+                .success(function (data) {
+                    if (data !== 'false') {
+                        ProductTypeVars.clearCache = true;
+                        callback(data);
+                    }
+                })
+                .error(function (data) {
+                    callback(data);
+                })
+        }
+
+        function save(productoTipo) {
+            var deferred = $q.defer();
+
+            if (productoTipo.producto_tipo_id != undefined) {
+                deferred.resolve(update(productoTipo));
+            } else {
+                deferred.resolve(create(productoTipo));
+            }
+            return deferred.promise;
+        }
+
+        /**
+         * @description: Crea un tipo de producto.
+         * @param productoTipo
+         * @returns {*}
+         */
+        function create(productoTipo) {
+            return $http.post(url,
+                {
+                    'function': 'createProductoTipo',
+                    'productoTipo': JSON.stringify(productoTipo)
+                })
+                .then(function (response) {
+                    ProductTypeVars.clearCache = true;
+                    return response.data;
+                })
+                .catch(function (response) {
+                    ProductTypeVars.clearCache = true;
+                    ErrorHandler(response);
+                });
+        }
+
+
+        /** @name: update
+         * @param productoTipo
+         * @description: Realiza update al tipo de producto.
+         */
+        function update(productoTipo) {
+            return $http.post(url,
+                {
+                    'function': 'updateProductoTipo',
+                    'productoTipo': JSON.stringify(productoTipo)
+                })
+                .then(function (response) {
+                    ProductTypeVars.clearCache = true;
+                    return response.data;
+                })
+                .catch(function (response) {
+                    ProductTypeVars.clearCache = true;
+                    ErrorHandler(response);
+                });
+        }
+
+        /**
+         * Para el uso de la paginacion, definir en el controlador las siguientes variables:
+         *
+         vm.start = 0;
+         vm.pagina = ProductTypeVars.pagina;
+         ProductTypeVars.paginacion = 5; Cantidad de registros por pagina
+         vm.end = ProductTypeVars.paginacion;
+
+
+         En el HTML, en el ng-repeat agregar el siguiente filtro: limitTo:appCtrl.end:appCtrl.start;
+
+         Agregar un bot�n de next:
+         <button ng-click="appCtrl.next()">next</button>
+
+         Agregar un bot�n de prev:
+         <button ng-click="appCtrl.prev()">prev</button>
+
+         Agregar un input para la p�gina:
+         <input type="text" ng-keyup="appCtrl.goToPagina()" ng-model="appCtrl.pagina">
+
+         */
+
+
+        /**
+         * @description: Ir a p�gina
+         * @param pagina
+         * @returns {*}
+         * uso: agregar un m�todo
+         vm.goToPagina = function () {
+                vm.start= ProductTypeService.goToPagina(vm.pagina).start;
+            };
+         */
+        function goToPagina(pagina) {
+
+            if (isNaN(pagina) || pagina < 1) {
+                ProductTypeVars.pagina = 1;
+                return ProductTypeVars;
+            }
+
+            if (pagina > ProductTypeVars.paginas) {
+                ProductTypeVars.pagina = ProductTypeVars.paginas;
+                return ProductTypeVars;
+            }
+
+            ProductTypeVars.pagina = pagina - 1;
+            ProductTypeVars.start = ProductTypeVars.pagina * ProductTypeVars.paginacion;
+            return ProductTypeVars;
+
+        }
+
+        /**
+         * @name next
+         * @description Ir a pr�xima p�gina
+         * @returns {*}
+         * uso agregar un metodo
+         vm.next = function () {
+                vm.start = CategoryService.next().start;
+                vm.pagina = CategoryVars.pagina;
+            };
+         */
+        function next() {
+
+            if (ProductTypeVars.pagina + 1 > ProductTypeVars.paginas) {
+                return ProductTypeVars;
+            }
+            ProductTypeVars.start = (ProductTypeVars.pagina * ProductTypeVars.paginacion);
+            ProductTypeVars.pagina = ProductTypeVars.pagina + 1;
+            //CategoryVars.end = CategoryVars.start + CategoryVars.paginacion;
+            return ProductTypeVars;
+        }
+
+        /**
+         * @name previous
+         * @description Ir a p�gina anterior
+         * @returns {*}
+         * uso, agregar un m�todo
+         vm.prev = function () {
+                vm.start= CategoryService.prev().start;
+                vm.pagina = CategoryVars.pagina;
+            };
+         */
+        function prev() {
+
+
+            if (ProductTypeVars.pagina - 2 < 0) {
+                return ProductTypeVars;
+            }
+
+            //CategoryVars.end = CategoryVars.start;
+            ProductTypeVars.start = (ProductTypeVars.pagina - 2 ) * ProductTypeVars.paginacion;
+            ProductTypeVars.pagina = ProductTypeVars.pagina - 1;
+            return ProductTypeVars;
+        }
+
+
+    }
+
+    ProductTypeVars.$inject = [];
+    /**
+     * @description Almacena variables temporales de tipos de productos
+     * @constructor
+     */
+    function ProductTypeVars() {
+        // Cantidad de paginas total del recordset
+        this.paginas = 1;
+        // Pagina seleccionada
+        this.pagina = 1;
+        // Cantidad de registros por pagina
+        this.paginacion = 10;
+        // Registro inicial, no es pagina, es el registro
+        this.start = 0;
+
+
+        // Indica si se debe limpiar el cache la proxima vez que se solicite un get
+        this.clearCache = true;
+
+    }
+
 
 })();

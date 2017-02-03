@@ -7,11 +7,11 @@ CREATE TABLE productos (
   pto_repo int(11) DEFAULT NULL,
   sku varchar(45) DEFAULT NULL,
   status int(11) DEFAULT NULL COMMENT '0 - Baja, 1 - Activo, 2 - XXX',
-  vendidos int(11) DEFAULT NULL COMMENT 'Este campo ayuda a la b�squeda de los mas vendidos en caso de no tener control de stock, tambi�n ayuda para no recorrer toda la base cuando est� integrado con stock',
+  vendidos int(11) DEFAULT NULL COMMENT 'Este campo ayuda a la búsqueda de los mas vendidos en caso de no tener control de stock, también ayuda para no recorrer toda la base cuando est� integrado con stock',
   destacado int(11) DEFAULT '0' COMMENT '0 - No, 1 - Si',
   en_slider int(1) DEFAULT '0' COMMENT '0 - No, 1 - Si',
   en_oferta int(1) DEFAULT '0' COMMENT '0 - No, 1 - Si',
-  producto_tipo int(11) DEFAULT NULL COMMENT '0 - producto / 1 - insumo / 2 - kit / 3 - Servicio',
+  producto_tipo_id int(11) DEFAULT NULL COMMENT '0 - producto / 1 - insumo / 2 - kit / 3 - Servicio',
   iva decimal(8,2) DEFAULT 0.0,
   PRIMARY KEY (producto_id),
   KEY SKU (sku)
@@ -32,6 +32,7 @@ CREATE TABLE categorias (
   categoria_id int(11) NOT NULL AUTO_INCREMENT,
   nombre varchar(100) NOT NULL,
   parent_id int(11) DEFAULT '-1',
+  status    INT(1)  DEFAULT '1',
   PRIMARY KEY (categoria_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -88,10 +89,31 @@ CREATE TABLE carrito_detalles (
   PRIMARY KEY (carrito_detalle_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-
-# PROVEEDORES POR PRODUCTO - Relaci�n entre productos y proveedores
+# PROVEEDORES POR PRODUCTO - Relación entre productos y proveedores
 CREATE TABLE productos_proveedores (
   producto_id int(11) NOT NULL,
   proveedor_id int(11) NOT NULL,
   PRIMARY KEY (producto_id,proveedor_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+# PRECIOS POR RANGO HORARIO
+CREATE TABLE precios_horario (
+  horario_id int(11) NOT NULL AUTO_INCREMENT,
+  precio_id int(11) NOT NULL DEFAULT '-1',
+  hora_desde TIME DEFAULT NULL,
+  hora_hasta TIME DEFAULT NULL,
+  PRIMARY KEY (horario_id),
+  KEY HORARIO_PRECIO_IDX (precio_id)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+# TIPOS DE PRODUCTOS
+CREATE TABLE productos_tipo (
+  producto_tipo_id int(11) NOT NULL AUTO_INCREMENT,
+  nombre varchar(50) DEFAULT NULL,
+  disponible_para_venta int(11) DEFAULT 0 COMMENT '0-No, 1-Si',
+  control_stock int(11) DEFAULT 0 COMMENT '0-No, 1-Si',
+  compuesto int(11) DEFAULT 0 COMMENT '0-No, 1-Si',
+  status int(11) NOT NULL COMMENT '0-Inactivo, 1-Activo',
+  PRIMARY KEY (producto_tipo_id),
+  KEY TIPOS_PROD_IDX (producto_tipo_id)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

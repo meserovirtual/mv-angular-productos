@@ -1,26 +1,26 @@
 (function () {
     'use strict';
 
-    angular.module('acProductosAdministracion', [])
-        .component('acProductosAdministracion', acProductosAdministracion());
+    angular.module('mvProductosAdministracion', [])
+        .component('mvProductosAdministracion', mvProductosAdministracion());
 
-    function acProductosAdministracion() {
+    function mvProductosAdministracion() {
         return {
             bindings: {
                 searchFunction: '&'
             },
             templateUrl: window.installPath + '/mv-angular-productos/mv-productos-administracion.html',
-            controller: AcProductosController
+            controller: MvProductosController
         }
     }
 
-    AcProductosController.$inject = ["ProductVars", 'ProductService', "AcUtils", "CategoryService", "UserService", "$scope",
+    MvProductosController.$inject = ["ProductVars", 'ProductService', "AcUtils", "CategoryService", "UserService", "$scope",
         "UploadVars", "UploadService", "ProductTypeService"];
     /**
      * @param AcProductos
      * @constructor
      */
-    function AcProductosController(ProductVars, ProductService, AcUtils, CategoryService, UserService, $scope, UploadVars,
+    function MvProductosController(ProductVars, ProductService, AcUtils, CategoryService, UserService, $scope, UploadVars,
                                    UploadService, ProductTypeService) {
         var vm = this;
 

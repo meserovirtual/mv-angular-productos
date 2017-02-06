@@ -1,25 +1,25 @@
 (function () {
     'use strict';
 
-    angular.module('acProductoTipoAdministracion', [])
-        .component('acProductoTipoAdministracion', acProductoTipoAdministracion());
+    angular.module('mvProductoTipoAdministracion', [])
+        .component('mvProductoTipoAdministracion', mvProductoTipoAdministracion());
 
-    function acProductoTipoAdministracion() {
+    function mvProductoTipoAdministracion() {
         return {
             bindings: {
                 searchFunction: '&'
             },
             templateUrl: window.installPath + '/mv-angular-productos/mv-productotipo-administracion.html',
-            controller: AcProductoTipoController
+            controller: MvProductoTipoController
         }
     }
 
-    AcProductoTipoController.$inject = ['ProductTypeVars', 'ProductTypeService', "AcUtils"];
+    MvProductoTipoController.$inject = ['ProductTypeVars', 'ProductTypeService', "AcUtils"];
     /**
      * @param AcUsuarios
      * @constructor
      */
-    function AcProductoTipoController(ProductTypeVars, ProductTypeService, AcUtils) {
+    function MvProductoTipoController(ProductTypeVars, ProductTypeService, AcUtils) {
         var vm = this;
 
         vm.productosTipo = [];

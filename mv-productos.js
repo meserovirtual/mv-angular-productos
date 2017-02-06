@@ -8,7 +8,7 @@
         currentScriptPath = window.installPath + '/mv-angular-productos/includes/mv-productos.php';
     }
 
-    angular.module('acProductos', [])
+    angular.module('mvProductos', [])
         .factory('ProductService', ProductService)
         .service('ProductVars', ProductVars)
         .factory('CategoryService', CategoryService)

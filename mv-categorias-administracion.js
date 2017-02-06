@@ -1,25 +1,25 @@
 (function () {
     'use strict';
 
-    angular.module('acCategoriasAdministracion', [])
-        .component('acCategoriasAdministracion', acCategoriasAdministracion());
+    angular.module('mvCategoriasAdministracion', [])
+        .component('mvCategoriasAdministracion', mvCategoriasAdministracion());
 
-    function acCategoriasAdministracion() {
+    function mvCategoriasAdministracion() {
         return {
             bindings: {
                 searchFunction: '&'
             },
             templateUrl: window.installPath + '/mv-angular-productos/mv-categorias-administracion.html',
-            controller: AcCategoriasController
+            controller: MvCategoriasController
         }
     }
 
-    AcCategoriasController.$inject = ['CategoryVars', 'CategoryService', "AcUtils"];
+    MvCategoriasController.$inject = ['CategoryVars', 'CategoryService', "AcUtils"];
     /**
      * @param AcUsuarios
      * @constructor
      */
-    function AcCategoriasController(CategoryVars, CategoryService, AcUtils) {
+    function MvCategoriasController(CategoryVars, CategoryService, AcUtils) {
         var vm = this;
 
         vm.categorias = [];

@@ -9,7 +9,7 @@
             bindings: {
                 searchFunction: '&'
             },
-            templateUrl: window.installPath + '/mv-angular-productos/ac-categorias-administracion.html',
+            templateUrl: window.installPath + '/mv-angular-productos/mv-categorias-administracion.html',
             controller: AcCategoriasController
         }
     }

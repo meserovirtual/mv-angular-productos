@@ -5,7 +5,7 @@
     var currentScriptPath = scripts[scripts.length - 1].src;
 
     if (currentScriptPath.length == 0) {
-        currentScriptPath = window.installPath + '/mv-angular-productos/includes/ac-productos.php';
+        currentScriptPath = window.installPath + '/mv-angular-productos/includes/mv-productos.php';
     }
 
     angular.module('acProductos', [])
@@ -25,7 +25,7 @@
         //Variables
         var service = {};
 
-        var url = currentScriptPath.replace('ac-productos.js', '/includes/ac-productos.php');
+        var url = currentScriptPath.replace('mv-productos.js', '/includes/mv-productos.php');
 
         //Function declarations
         service.get = get;
@@ -327,7 +327,7 @@
         //Variables
         var service = {};
 
-        var url = currentScriptPath.replace('ac-productos.js', '/includes/ac-productos.php');
+        var url = currentScriptPath.replace('mv-productos.js', '/includes/mv-productos.php');
 
         //Function declarations
         service.get = get;
@@ -602,7 +602,7 @@
         var service = {};
 
 
-        var url = currentScriptPath.replace('ac-productos.js', '/includes/ac-productos.php');
+        var url = currentScriptPath.replace('mv-productos.js', '/includes/mv-productos.php');
 
         //Function declarations
         service.get = get;
@@ -1050,7 +1050,7 @@
         //Variables
         var service = {};
 
-        var url = currentScriptPath.replace('ac-productos.js', '/includes/ac-productos.php');
+        var url = currentScriptPath.replace('mv-productos.js', '/includes/mv-productos.php');
 
         //Function declarations
         service.get = get;

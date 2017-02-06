@@ -9,7 +9,7 @@
             bindings: {
                 searchFunction: '&'
             },
-            templateUrl: window.installPath + '/mv-angular-productos/ac-productotipo-administracion.html',
+            templateUrl: window.installPath + '/mv-angular-productos/mv-productotipo-administracion.html',
             controller: AcProductoTipoController
         }
     }

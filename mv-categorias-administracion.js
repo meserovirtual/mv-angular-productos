@@ -14,12 +14,12 @@
         }
     }
 
-    MvCategoriasController.$inject = ['CategoryVars', 'CategoryService', "AcUtils"];
+    MvCategoriasController.$inject = ['CategoryVars', 'CategoryService', "MvUtils"];
     /**
      * @param AcUsuarios
      * @constructor
      */
-    function MvCategoriasController(CategoryVars, CategoryService, AcUtils) {
+    function MvCategoriasController(CategoryVars, CategoryService, MvUtils) {
         var vm = this;
 
         vm.categorias = [];
@@ -56,11 +56,11 @@
         function save() {
             if(vm.categoria.nombre === undefined || vm.categoria.nombre.length == 0) {
                 element[0].classList.add('error-input');
-                AcUtils.showMessage('error', 'El nombre de la categoria no puede ser vacio');
+                MvUtils.showMessage('error', 'El nombre de la categoria no puede ser vacio');
                 return;
             } else if(vm.categoria.nombre.length > 70) {
                 element[0].classList.add('error-input');
-                AcUtils.showMessage('error', 'El nombre de la categoria no puede tener más de 100 caracteres');
+                MvUtils.showMessage('error', 'El nombre de la categoria no puede tener más de 100 caracteres');
                 return;
             }
 
@@ -74,13 +74,13 @@
                 vm.detailsOpen = data.error;
                 if(data.error) {
                     element[0].classList.add('error-input');
-                    AcUtils.showMessage('error', data.message);
+                    MvUtils.showMessage('error', data.message);
                 }
                 else {
                     vm.categoria = {};
                     loadCategorias();
                     element[0].classList.remove('error-input');
-                    AcUtils.showMessage('success', data.message);
+                    MvUtils.showMessage('success', data.message);
                 }
             })
             .catch(function (data) {
@@ -106,7 +106,7 @@
                         vm.categoria = {};
                         vm.detailsOpen = false;
                         loadCategorias();
-                        AcUtils.showMessage('success', 'La registro se borro satisfactoriamente');
+                        MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
                     });
                 }
             }
@@ -122,7 +122,7 @@
         */
 
         function omitirAcentos(texto) {
-            return AcUtils.omitirAcentos(texto);
+            return MvUtils.omitirAcentos(texto);
         }
 
         function cancel() {
@@ -153,20 +153,20 @@
         }
 
         vm.next = function () {
-            paginar(AcUtils.next(CategoryVars));
+            paginar(MvUtils.next(CategoryVars));
         };
         vm.prev = function () {
-            paginar(AcUtils.prev(CategoryVars));
+            paginar(MvUtils.prev(CategoryVars));
         };
         vm.first = function () {
-            paginar(AcUtils.first(CategoryVars));
+            paginar(MvUtils.first(CategoryVars));
         };
         vm.last = function () {
-            paginar(AcUtils.last(CategoryVars));
+            paginar(MvUtils.last(CategoryVars));
         };
 
         vm.goToPagina = function () {
-            paginar(AcUtils.goToPagina(vm.pagina, CategoryVars));
+            paginar(MvUtils.goToPagina(vm.pagina, CategoryVars));
         }
 
     }

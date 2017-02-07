@@ -14,12 +14,12 @@
         }
     }
 
-    MvProductoTipoController.$inject = ['ProductTypeVars', 'ProductTypeService', "AcUtils"];
+    MvProductoTipoController.$inject = ['ProductTypeVars', 'ProductTypeService', "MvUtils"];
     /**
      * @param AcUsuarios
      * @constructor
      */
-    function MvProductoTipoController(ProductTypeVars, ProductTypeService, AcUtils) {
+    function MvProductoTipoController(ProductTypeVars, ProductTypeService, MvUtils) {
         var vm = this;
 
         vm.productosTipo = [];
@@ -58,11 +58,11 @@
         function save() {
             if(vm.productoTipo.nombre === undefined || vm.productoTipo.nombre.length == 0) {
                 element[0].classList.add('error-input');
-                AcUtils.showMessage('error', 'El nombre del tipo de producto no puede ser vacio');
+                MvUtils.showMessage('error', 'El nombre del tipo de producto no puede ser vacio');
                 return;
             } else if(vm.productoTipo.nombre.length > 50) {
                 element[0].classList.add('error-input');
-                AcUtils.showMessage('error', 'El nombre del tipo de producto no puede tener más de 50 caracteres');
+                MvUtils.showMessage('error', 'El nombre del tipo de producto no puede tener más de 50 caracteres');
                 return;
             }
 
@@ -79,13 +79,13 @@
                 vm.detailsOpen = data.error;
                 if(data.error) {
                     element[0].classList.add('error-input');
-                    AcUtils.showMessage('error', data.message);
+                    MvUtils.showMessage('error', data.message);
                 }
                 else {
                     vm.productoTipo = {};
                     loadProductosTipo();
                     element[0].classList.remove('error-input');
-                    AcUtils.showMessage('success', data.message);
+                    MvUtils.showMessage('success', data.message);
                 }
             })
             .catch(function (data) {
@@ -110,7 +110,7 @@
                         vm.productoTipo = {};
                         vm.detailsOpen = false;
                         loadProductosTipo();
-                        AcUtils.showMessage('success', 'La registro se borro satisfactoriamente');
+                        MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
                     });
                 }
             }
@@ -153,20 +153,20 @@
         }
 
         vm.next = function () {
-            paginar(AcUtils.next(ProductTypeVars));
+            paginar(MvUtils.next(ProductTypeVars));
         };
         vm.prev = function () {
-            paginar(AcUtils.prev(ProductTypeVars));
+            paginar(MvUtils.prev(ProductTypeVars));
         };
         vm.first = function () {
-            paginar(AcUtils.first(ProductTypeVars));
+            paginar(MvUtils.first(ProductTypeVars));
         };
         vm.last = function () {
-            paginar(AcUtils.last(ProductTypeVars));
+            paginar(MvUtils.last(ProductTypeVars));
         };
 
         vm.goToPagina = function () {
-            paginar(AcUtils.goToPagina(vm.pagina, ProductTypeVars));
+            paginar(MvUtils.goToPagina(vm.pagina, ProductTypeVars));
         }
 
     }

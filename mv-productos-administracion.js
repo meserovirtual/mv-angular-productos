@@ -14,13 +14,13 @@
         }
     }
 
-    MvProductosController.$inject = ["ProductVars", 'ProductService', "AcUtils", "CategoryService", "UserService", "$scope",
+    MvProductosController.$inject = ["ProductVars", 'ProductService', "MvUtils", "CategoryService", "UserService", "$scope",
         "UploadVars", "UploadService", "ProductTypeService"];
     /**
      * @param AcProductos
      * @constructor
      */
-    function MvProductosController(ProductVars, ProductService, AcUtils, CategoryService, UserService, $scope, UploadVars,
+    function MvProductosController(ProductVars, ProductService, MvUtils, CategoryService, UserService, $scope, UploadVars,
                                    UploadService, ProductTypeService) {
         var vm = this;
 
@@ -114,7 +114,7 @@
 
         function openPrice() {
             if(vm.producto == undefined || vm.producto.producto_id == undefined) {
-                AcUtils.showMessage('warning', 'Debe seleccionar un Producto');
+                MvUtils.showMessage('warning', 'Debe seleccionar un Producto');
             } else {
                 vm.priceOpen=true;
                 vm.detailsOpen = false;
@@ -238,7 +238,7 @@
         function save() {
             if(vm.producto.nombre == undefined || vm.producto.nombre.length == 0){
                 element1[0].classList.add('error-input');
-                AcUtils.showMessage('error', 'El nombre es obligatorio');
+                MvUtils.showMessage('error', 'El nombre es obligatorio');
                 return;
             }
 
@@ -274,17 +274,17 @@
                 vm.detailsOpen = (data === undefined || data < 0) ? true : false;
                 if(data == undefined) {
                     element1[0].classList.add('error-input');
-                    AcUtils.showMessage('error', 'Error guardando el registro');
+                    MvUtils.showMessage('error', 'Error guardando el registro');
                 } else {
                     //vm.detailsOpen = false;
                     cleanProducto();
                     loadProductos();
                     element1[0].classList.remove('error-input');
-                    AcUtils.showMessage('success', 'La operación se realizó satisfactoriamente');
+                    MvUtils.showMessage('success', 'La operación se realizó satisfactoriamente');
                 }
             }).catch(function (data) {
                 cleanProducto();
-                AcUtils.showMessage('error', 'Error guardando el registro');
+                MvUtils.showMessage('error', 'Error guardando el registro');
                 //setData(data);
             });
         }
@@ -294,18 +294,18 @@
                 element2[0].classList.add('error-input');
                 element3[0].classList.add('error-input');
                 element4[0].classList.add('error-input');
-                AcUtils.showMessage('error', 'Debe ingresar el primer precio y horario');
+                MvUtils.showMessage('error', 'Debe ingresar el primer precio y horario');
                 return;
             }
 
             for(var i=0; i < vm.producto.precios.length; i++){
                 if(vm.producto.precios[i].hora_desde == undefined || vm.producto.precios[i].hora_desde == '') {
                     element3[0].classList.add('error-input');
-                    AcUtils.showMessage('error', 'La hora desde es obligatoria');
+                    MvUtils.showMessage('error', 'La hora desde es obligatoria');
                     return;
-                } else if(vm.producto.precios[i].hora_desde != '' && !AcUtils.validaHora(vm.producto.precios[i].hora_desde)) {
+                } else if(vm.producto.precios[i].hora_desde != '' && !MvUtils.validaHora(vm.producto.precios[i].hora_desde)) {
                     element3[0].classList.add('error-input');
-                    AcUtils.showMessage('error', 'El formato de hora desde no es correcto');
+                    MvUtils.showMessage('error', 'El formato de hora desde no es correcto');
                     return;
                 } else {
                     element3[0].classList.remove('error-input');
@@ -313,11 +313,11 @@
 
                 if(vm.producto.precios[i].hora_hasta == undefined || vm.producto.precios[i].hora_hasta == '') {
                     element4[0].classList.add('error-input');
-                    AcUtils.showMessage('error', 'La hora hasta es obligatoria');
+                    MvUtils.showMessage('error', 'La hora hasta es obligatoria');
                     return;
-                } else if(vm.producto.precios[i].hora_hasta != '' && !AcUtils.validaHora(vm.producto.precios[i].hora_hasta)) {
+                } else if(vm.producto.precios[i].hora_hasta != '' && !MvUtils.validaHora(vm.producto.precios[i].hora_hasta)) {
                     element4[0].classList.add('error-input');
-                    AcUtils.showMessage('error', 'El formato de hora hasta no es correcto');
+                    MvUtils.showMessage('error', 'El formato de hora hasta no es correcto');
                     return;
                 } else {
                     element4[0].classList.remove('error-input');
@@ -327,7 +327,7 @@
             for(var i=0; i < vm.producto.precios.length; i++){
                 if(vm.producto.precios[i].hora_desde >= vm.producto.precios[i].hora_hasta) {
                     element3[0].classList.add('error-input');
-                    AcUtils.showMessage('error', 'La hora desde no puede ser mayor o igual que la hora hasta');
+                    MvUtils.showMessage('error', 'La hora desde no puede ser mayor o igual que la hora hasta');
                     return;
                 }
             }
@@ -335,14 +335,14 @@
             //console.log(vm.producto);
 
             if(vm.producto.producto_id === undefined) {
-                AcUtils.showMessage('error', 'Debe seleccionar un Producto');
+                MvUtils.showMessage('error', 'Debe seleccionar un Producto');
             } else {
                 ProductService.savePrecioPorHorario(vm.producto).then(function (data) {
                     if(data === undefined) {
                         element2[0].classList.add('error-input');
                         element3[0].classList.add('error-input');
                         element4[0].classList.add('error-input');
-                        AcUtils.showMessage('error', 'Error actualizando el dato');
+                        MvUtils.showMessage('error', 'Error actualizando el dato');
                     }
                     else {
                         vm.producto = {};
@@ -350,7 +350,7 @@
                         element2[0].classList.remove('error-input');
                         element3[0].classList.remove('error-input');
                         element4[0].classList.remove('error-input');
-                        AcUtils.showMessage('success', 'La operación se realizó satisfactoriamente');
+                        MvUtils.showMessage('success', 'La operación se realizó satisfactoriamente');
                         vm.priceOpen = false;
                     }
                 })
@@ -466,20 +466,20 @@
         }
 
         vm.next = function () {
-            paginar(AcUtils.next(ProductVars));
+            paginar(MvUtils.next(ProductVars));
         };
         vm.prev = function () {
-            paginar(AcUtils.prev(ProductVars));
+            paginar(MvUtils.prev(ProductVars));
         };
         vm.first = function () {
-            paginar(AcUtils.first(ProductVars));
+            paginar(MvUtils.first(ProductVars));
         };
         vm.last = function () {
-            paginar(AcUtils.last(ProductVars));
+            paginar(MvUtils.last(ProductVars));
         };
 
         vm.goToPagina = function () {
-            paginar(AcUtils.goToPagina(vm.pagina, ProductVars));
+            paginar(MvUtils.goToPagina(vm.pagina, ProductVars));
         }
 
     }

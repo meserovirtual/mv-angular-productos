@@ -20,8 +20,8 @@
     ;
 
 
-    ProductService.$inject = ['$http', 'ProductVars', '$cacheFactory', 'AcUtils', '$q', '$location', 'AcUtilsGlobals', 'ErrorHandler'];
-    function ProductService($http, ProductVars, $cacheFactory, AcUtils, $q, $location, AcUtilsGlobals, ErrorHandler) {
+    ProductService.$inject = ['$http', 'ProductVars', '$cacheFactory', 'MvUtils', '$q', '$location', 'MvUtilsGlobals', 'ErrorHandler'];
+    function ProductService($http, ProductVars, $cacheFactory, MvUtils, $q, $location, MvUtilsGlobals, ErrorHandler) {
         //Variables
         var service = {};
 
@@ -86,7 +86,7 @@
          * @returns {*}
          */
         function get() {
-            AcUtilsGlobals.startWaiting();
+            MvUtilsGlobals.startWaiting();
             var urlGet = url + '?function=getProductos';
             var $httpDefaultCache = $cacheFactory.get('$http');
             var cachedData = [];
@@ -101,7 +101,7 @@
                     var deferred = $q.defer();
                     cachedData = $httpDefaultCache.get(urlGet);
                     deferred.resolve(cachedData);
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     return deferred.promise;
                 }
             }
@@ -137,13 +137,13 @@
                         $httpDefaultCache.put(urlGet, response.data);
                         ProductVars.clearCache = false;
                         ProductVars.paginas = (response.data.length % ProductVars.paginacion == 0) ? parseInt(response.data.length / ProductVars.paginacion) : parseInt(response.data.length / ProductVars.paginacion) + 1;
-                        AcUtilsGlobals.stopWaiting();
+                        MvUtilsGlobals.stopWaiting();
                         return response.data;
                     }
                 )
                 .catch(function (response) {
                     ProductVars.clearCache = true;
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     ErrorHandler(response);
                 })
         }
@@ -157,7 +157,7 @@
          */
         function getByParams(params, values, exact_match) {
             return get().then(function (data) {
-                return AcUtils.getByParams(params, values, exact_match, data);
+                return MvUtils.getByParams(params, values, exact_match, data);
             }).then(function (data) {
                 return data;
             });
@@ -322,8 +322,8 @@
     }
 
 
-    CategoryService.$inject = ['$http', 'CategoryVars', '$cacheFactory', 'AcUtils', 'AcUtilsGlobals', 'ErrorHandler', '$q'];
-    function CategoryService($http, CategoryVars, $cacheFactory, AcUtils, AcUtilsGlobals, ErrorHandler, $q) {
+    CategoryService.$inject = ['$http', 'CategoryVars', '$cacheFactory', 'MvUtils', 'MvUtilsGlobals', 'ErrorHandler', '$q'];
+    function CategoryService($http, CategoryVars, $cacheFactory, MvUtils, MvUtilsGlobals, ErrorHandler, $q) {
         //Variables
         var service = {};
 
@@ -354,7 +354,7 @@
             var urlGet = url + '?function=getCategorias';
             var $httpDefaultCache = $cacheFactory.get('$http');
             var cachedData = [];
-            AcUtilsGlobals.startWaiting();
+            MvUtilsGlobals.startWaiting();
 
 
             // Verifica si existe el cache de categorias
@@ -366,7 +366,7 @@
                     var deferred = $q.defer();
                     cachedData = $httpDefaultCache.get(urlGet);
                     deferred.resolve(cachedData);
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     return deferred.promise;
                 }
             }
@@ -377,12 +377,12 @@
                     $httpDefaultCache.put(urlGet, response.data);
                     CategoryVars.clearCache = false;
                     CategoryVars.paginas = (response.data.length % CategoryVars.paginacion == 0) ? parseInt(response.data.length / CategoryVars.paginacion) : parseInt(response.data.length / CategoryVars.paginacion) + 1;
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     return response.data;
                 })
                 .catch(function (response) {
                     CategoryVars.clearCache = true;
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     ErrorHandler(response);
                 })
         }
@@ -397,7 +397,7 @@
         function getByParams(params, values, exact_match, callback) {
             get(function (data) {
 
-                AcUtils.getByParams(params, values, exact_match, data, callback);
+                MvUtils.getByParams(params, values, exact_match, data, callback);
             })
         }
 
@@ -596,8 +596,8 @@
     }
 
 
-    CartService.$inject = ['$http', 'CartVars', '$cacheFactory', 'AcUtils'];
-    function CartService($http, CartVars, $cacheFactory, AcUtils) {
+    CartService.$inject = ['$http', 'CartVars', '$cacheFactory', 'MvUtils'];
+    function CartService($http, CartVars, $cacheFactory, MvUtils) {
         //Variables
         var service = {};
 
@@ -759,7 +759,7 @@
         function reloadLastCart(usuario_id, callback) {
 
             get(usuario_id, function (data) {
-                AcUtils.getByParams('status', "0", "true", data, callback);
+                MvUtils.getByParams('status', "0", "true", data, callback);
             });
 
         }
@@ -825,7 +825,7 @@
          */
         function getByParams(params, values, exact_match, usuario_id, callback) {
             get(usuario_id, function (data) {
-                AcUtils.getByParams(params, values, exact_match, data, callback);
+                MvUtils.getByParams(params, values, exact_match, data, callback);
             })
         }
 
@@ -1045,8 +1045,8 @@
 
 
 
-    ProductTypeService.$inject = ['$http', 'ProductTypeVars', '$cacheFactory', 'AcUtils', 'AcUtilsGlobals', 'ErrorHandler', '$q'];
-    function ProductTypeService($http, ProductTypeVars, $cacheFactory, AcUtils, AcUtilsGlobals, ErrorHandler, $q) {
+    ProductTypeService.$inject = ['$http', 'ProductTypeVars', '$cacheFactory', 'MvUtils', 'MvUtilsGlobals', 'ErrorHandler', '$q'];
+    function ProductTypeService($http, ProductTypeVars, $cacheFactory, MvUtils, MvUtilsGlobals, ErrorHandler, $q) {
         //Variables
         var service = {};
 
@@ -1076,7 +1076,7 @@
             var urlGet = url + '?function=getProductosTipos';
             var $httpDefaultCache = $cacheFactory.get('$http');
             var cachedData = [];
-            AcUtilsGlobals.startWaiting();
+            MvUtilsGlobals.startWaiting();
 
             // Verifica si existe el cache de categorias
             if ($httpDefaultCache.get(urlGet) != undefined) {
@@ -1087,7 +1087,7 @@
                     var deferred = $q.defer();
                     cachedData = $httpDefaultCache.get(urlGet);
                     deferred.resolve(cachedData);
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     return deferred.promise;
                 }
             }
@@ -1097,12 +1097,12 @@
                     $httpDefaultCache.put(urlGet, response.data);
                     ProductTypeVars.clearCache = false;
                     ProductTypeVars.paginas = (response.data.length % ProductTypeVars.paginacion == 0) ? parseInt(response.data.length / ProductTypeVars.paginacion) : parseInt(response.data.length / ProductTypeVars.paginacion) + 1;
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     return response.data;
                 })
                 .catch(function (response) {
                     ProductTypeVars.clearCache = true;
-                    AcUtilsGlobals.stopWaiting();
+                    MvUtilsGlobals.stopWaiting();
                     ErrorHandler(response);
                 })
         }

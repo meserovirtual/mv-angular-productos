@@ -50,7 +50,7 @@ class Productos extends Main
     p.status,
     p.vendidos,
     p.destacado,
-    p.producto_tipo,
+    p.producto_tipo_id,
     p.en_slider,
     p.en_oferta,
     p.iva,
@@ -92,7 +92,7 @@ FROM
         LEFT JOIN
     usuarios u ON u.usuario_id = pro.proveedor_id
 GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
-p.vendidos , p.destacado , p.producto_tipo , p.en_slider , p.en_oferta , c.categoria_id ,
+p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , c.categoria_id ,
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
 pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido;');
 

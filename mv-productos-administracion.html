@@ -23,7 +23,7 @@
                 $ctrl.getProveedores(row.proveedores);$ctrl.detailsOpen=true;$ctrl.priceOpen=false;$ctrl.update=true;">
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{row.nombre}}</td>
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{row.categorias[0].nombre}}</td>
-                <td ng-class="{'row-warning':row.precios.length == 0}">{{$ctrl.getTipoProducto(row.producto_tipo);}}</td>
+                <td ng-class="{'row-warning':row.precios.length == 0}">{{$ctrl.getTipoProducto(row.producto_tipo_id);}}</td>
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{row.precios.length > 0 ? 'Si' : 'No'}}</td>
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{row.status == 0 ? 'N' : 'S'}}</td>
             </tr>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="mdl-selectfield">
                     <label>Tipo Producto</label>
-                    <select name="producto_tipo" id="producto_tipo" ng-model="$ctrl.productoTipo"
+                    <select name="producto_tipo_id" id="producto_tipo_id" ng-model="$ctrl.productoTipo"
                             ng-options="productoTipo.nombre  for productoTipo in $ctrl.productosTipo"
                             class="browser-default">
                     </select>

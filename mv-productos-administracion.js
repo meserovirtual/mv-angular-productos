@@ -127,9 +127,9 @@
             }
         }
 
-        function getTipoProducto(producto_tipo) {
+        function getTipoProducto(producto_tipo_id) {
             for(var i=0; i < vm.productosTipo.length; i++){
-                if(vm.productosTipo[i].producto_tipo_id == producto_tipo){
+                if(vm.productosTipo[i].producto_tipo_id == producto_tipo_id){
                     return vm.productosTipo[i].nombre;
                 }
             }
@@ -165,7 +165,7 @@
             }
 
             for(var i=0; i < vm.productosTipo.length; i++){
-                if(vm.productosTipo[i].producto_tipo_id == producto.producto_tipo){
+                if(vm.productosTipo[i].producto_tipo_id == producto.producto_tipo_id){
                     vm.productoTipo = vm.productosTipo[i];
                     break;
                 }
@@ -258,7 +258,7 @@
 
             vm.producto.categorias = [];
             vm.producto.categorias.push(vm.categoria);
-            vm.producto.producto_tipo = vm.productoTipo.producto_tipo_id;
+            vm.producto.producto_tipo_id = vm.productoTipo.producto_tipo_id;
 
             if (vm.producto.producto_id == undefined) {
                 vm.producto.status = 1;

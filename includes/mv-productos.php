@@ -57,6 +57,7 @@ class Productos extends Main
     c.categoria_id,
     c.nombre nombreCategoria,
     c.parent_id,
+    c.status,
     ps.producto_kit_id,
     ps.producto_id productoKit,
     ps.producto_cantidad,
@@ -96,7 +97,6 @@ p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , c.ca
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
 pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido;');
 
-
         $final = array();
         foreach ($results as $row) {
 
@@ -110,7 +110,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                     'status' => $row["status"],
                     'vendidos' => $row["vendidos"],
                     'destacado' => $row["destacado"],
-                    'producto_tipo' => $row["producto_tipo"],
+                    'producto_tipo_id' => $row["producto_tipo_id"],
                     'en_slider' => $row["en_slider"],
                     'en_oferta' => $row["en_oferta"],
                     'iva' => $row["iva"],
@@ -134,7 +134,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                     $final[$row['producto_id']]['categorias'][] = array(
                         'categoria_id' => $row['categoria_id'],
                         'nombre' => $row['nombreCategoria'],
-                        'parent_id' => $row['parent_id']
+                        'parent_id' => $row['parent_id'],
+                        'status' => $row['status']
                     );
 
                     $have_cat = true;
@@ -144,7 +145,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                     array_push($final[$row['producto_id']]['categorias'], array(
                         'categoria_id' => $row['categoria_id'],
                         'nombre' => $row['nombreCategoria'],
-                        'parent_id' => $row['parent_id']
+                        'parent_id' => $row['parent_id'],
+                        'status' => $row['status']
                     ));
                 }
             }
@@ -328,7 +330,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             'destacado' => $product_decoded->destacado,
             'en_slider' => $product_decoded->en_slider,
             'en_oferta' => $product_decoded->en_oferta,
-            'producto_tipo' => $product_decoded->producto_tipo,
+            'producto_tipo_id' => $product_decoded->producto_tipo_id,
             'iva' => $product_decoded->iva
         );
 
@@ -370,7 +372,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             }
 
             // Solo para cuando es kit
-            if ($product_decoded->producto_tipo == 2) {
+            if ($product_decoded->producto_tipo_id == 2) {
                 foreach ($product_decoded->kits as $kit) {
                     if (!self::createKits($kit, $result, $db)) {
                         $db->rollback();
@@ -684,7 +686,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             'destacado' => $product_decoded->destacado,
             'en_slider' => $product_decoded->en_slider,
             'en_oferta' => $product_decoded->en_oferta,
-            'producto_tipo' => $product_decoded->producto_tipo,
+            'producto_tipo_id' => $product_decoded->producto_tipo_id,
             'iva' => $product_decoded->iva
         );
 
@@ -751,7 +753,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             }
 
             // Solo para cuando es kit
-            if ($product_decoded->producto_tipo == 2) {
+            if ($product_decoded->producto_tipo_id == 2) {
                 foreach ($product_decoded->kits as $producto_kit) {
                     if (!self::createKits($producto_kit, $product_decoded->producto_id, $db)) {
                         $db->rollback();
@@ -1022,7 +1024,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $producto->destacado = (!array_key_exists("destacado", $producto)) ? 0 : $producto->destacado;
         $producto->en_slider = (!array_key_exists("en_slider", $producto)) ? 0 : $producto->en_slider;
         $producto->en_oferta = (!array_key_exists("en_oferta", $producto)) ? 0 : $producto->en_oferta;
-        $producto->producto_tipo = (!array_key_exists("producto_tipo", $producto)) ? 0 : $producto->producto_tipo;
+        $producto->producto_tipo_id = (!array_key_exists("producto_tipo_id", $producto)) ? 0 : $producto->producto_tipo_id;
         $producto->iva = (!array_key_exists("iva", $producto)) ? 0.0 : $producto->iva;
         $producto->precios = (!array_key_exists("precios", $producto)) ? array() : self::checkPrecios($producto->precios);
         $producto->fotos = (!array_key_exists("fotos", $producto)) ? array() : self::checkFotos($producto->fotos);
@@ -1030,7 +1032,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $producto->proveedores = (!array_key_exists("proveedores", $producto)) ? array() : self::checkProductosProveedores($producto->proveedores);
 
         // Ejecuta la verificación solo si es kit
-        if ($producto->producto_tipo == 2) {
+        if ($producto->producto_tipo_id == 2) {
             $producto->kits = (!array_key_exists("kits", $producto)) ? array() : self::checkProductosKit($producto->kits);
         }
         return $producto;

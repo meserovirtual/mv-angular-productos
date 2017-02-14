@@ -1,0 +1,339 @@
+<div class="container" ng-class="{'form-container':$ctrl.openContainer()}">
+    <div ng-class="{'form-lista':$ctrl.openContainer()}">
+        <div class="buscador-container">
+            <div class="input">
+                <input type="text" class="buscador" ng-model="$ctrl.filtro"
+                       placeholder="Buscar Producto" style="width: 100%">
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Categoria</th>
+                <th>Tipo de Producto</th>
+                <th>Tiene Precio</th>
+                <th>Activo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="row in $ctrl.productos | filter:$ctrl.filtro | limitTo:$ctrl.limit:$ctrl.start"
+                ng-click="row.producto_id=''+row.producto_id;$ctrl.producto=row;$ctrl.getFotos(row.fotos);$ctrl.setCheckBox(row);
+                $ctrl.getProveedores(row.proveedores);$ctrl.detailsOpen=true;$ctrl.priceOpen=false;$ctrl.update=true;">
+                <td ng-class="{'row-warning':row.precios.length == 0}">{{row.nombre}}</td>
+                <td ng-class="{'row-warning':row.precios.length == 0}">{{row.categorias[0].nombre}}</td>
+                <td ng-class="{'row-warning':row.precios.length == 0}">{{$ctrl.getTipoProducto(row.producto_tipo_id);}}</td>
+                <td ng-class="{'row-warning':row.precios.length == 0}">{{row.precios.length > 0 ? 'Si' : 'No'}}</td>
+                <td ng-class="{'row-warning':row.precios.length == 0}">{{row.status == 0 ? 'N' : 'S'}}</td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="5">
+                    <div class="table-td">
+                        <span>
+                            <button class="paginacion-primera" ng-click="$ctrl.first();"></button>
+                            <button class="paginacion-ant" ng-click="$ctrl.prev();"></button>
+                        </span>
+                        <span class="paginacion-paginas">
+                            <span>{{'PAGE' | xlat}} {{$ctrl.pagina}} {{'OF' | xlat}} {{$ctrl.paginas}}</span>
+                        </span>
+                        <span class="paginacion-go-to">{{'GO_TO' | xlat}}
+                            <input type="number" ng-model="$ctrl.pagina" ng-keyup="$ctrl.goToPagina();"
+                                   class="input-paginacion">
+                        </span>
+                        <span>
+                            <button class="paginacion-sig" ng-click="$ctrl.next();"></button>
+                            <button class="paginacion-ultima"ng-click="$ctrl.last();"></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+        <div class="botonera">
+            <button type="button" class="boton-agregar" ng-click="$ctrl.cleanProducto();$ctrl.detailsOpen=true;$ctrl.priceOpen=false" title="Nuevo">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+
+    <form class="form-abm" form-id="abm-detalle" ng-class="{'form-open':$ctrl.detailsOpen}">
+        <div class="detalle-container">
+            <h2>Nuevo Producto</h2>
+
+            <div class="mv-col">
+                <div class="input" data-tip="Producto">
+                    <input id="nombre" type="text" ng-model="$ctrl.producto.nombre" placeholder="Nombre"
+                           autocomplete="off" maxlength="100"/>
+                </div>
+            </div>
+            <div class="mv-col">
+                <div class="mdl-selectfield">
+                    <label>Categoria</label>
+                    <select name="categoria" id="categoria" ng-model="$ctrl.categoria"
+                            ng-options="categoria.nombre  for categoria in $ctrl.categorias"
+                            class="browser-default">
+                    </select>
+                </div>
+                <div class="mdl-selectfield">
+                    <label>Tipo Producto</label>
+                    <select name="producto_tipo_id" id="producto_tipo_id" ng-model="$ctrl.productoTipo"
+                            ng-options="productoTipo.nombre  for productoTipo in $ctrl.productosTipo"
+                            class="browser-default">
+                    </select>
+                </div>
+                <!--
+                <div class="mdl-selectfield">
+                    <label>Estado</label>
+                    <select name="status" id="status" ng-model="$ctrl.producto.status" class="browser-default">
+                        <option value="" disabled selected>Estado</option>
+                        <option value="1" selected>Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                </div>
+                -->
+            </div>
+            <div class="mv-col">
+                <label class="label--checkbox" ng-click="$ctrl.en_oferta=!$ctrl.en_oferta">
+                    <input type="checkbox" class="checkbox" id="check-en-oferta" ng-checked="$ctrl.en_oferta">En Oferta
+                </label>
+                <label class="label--checkbox" ng-click="$ctrl.en_slider=!$ctrl.en_slider">
+                    <input type="checkbox" class="checkbox" id="check-en-slider" ng-checked="$ctrl.en_slider">En Slider
+                </label>
+                <label class="label--checkbox" ng-click="$ctrl.destacado=!$ctrl.destacado">
+                    <input type="checkbox" class="checkbox" id="check-destacado" ng-checked="$ctrl.destacado">Destacado
+                </label>
+                <label class="label--checkbox" ng-click="$ctrl.status=!$ctrl.status" ng-if="$ctrl.update">
+                    <input type="checkbox" class="checkbox" id="check-status" ng-checked="$ctrl.status">Activo
+                </label>
+            </div>
+            <div class="mv-col">
+                <!--
+                <div class="mdl-selectfield">
+                    <label>Oferta</label>
+                    <select name="en_oferta" id="en_oferta" ng-model="$ctrl.producto.en_oferta" class="browser-default">
+                        <option value="" disabled selected>Oferta</option>
+                        <option value="1" selected>Si</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div class="mdl-selectfield">
+                    <label>En slider</label>
+                    <select name="en_slider" id="en_slider" ng-model="$ctrl.producto.en_slider" class="browser-default">
+                        <option value="" disabled selected>En slider</option>
+                        <option value="1" selected>Si</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                -->
+                <!--
+                <div class="mdl-selectfield">
+                    <label>Destacado</label>
+                    <select name="destacado" id="destacado" ng-model="$ctrl.producto.destacado" class="browser-default">
+                        <option value="" disabled selected>Destacado</option>
+                        <option value="1">Si</option>
+                        <option value="0" selected>No</option>
+                    </select>
+                </div>
+                -->
+            </div>
+            <div class="mv-col" data-tip="Descripción">
+                <textarea id="descripcion" name="descripcion" ng-model="$ctrl.producto.descripcion"
+                        max-length="2000;{{'ERROR_MAX_LENGTH' | xlat:{campo:('DESCRIPTION'|xlat), length:('2000')} }}"
+                        placeholder="{{'DESCRIPTION'|xlat}}"></textarea>
+            </div>
+
+            <div class="mv-col">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Proveedores</div>
+                    <div class="panel-body">
+                        <ul class="list">
+                            <li class="list__item" ng-repeat="proveedor in $ctrl.proveedores">
+                                <label class="label--checkbox" ng-click="proveedor.check = !proveedor.check;">
+                                    <input type="checkbox" class="checkbox" id="check-{{proveedor.usuario_id}}"
+                                           ng-checked="proveedor.check">{{proveedor.nombre}}
+                                </label>
+                            </li>
+                        </ul>
+                        <!--
+                        <div ng-repeat="proveedor in $ctrl.proveedores | filter:$ctrl.filter"
+                             style="display:flex; align-items: flex-start; flex-direction: column;">
+                            <!--<input id="check-{{proveedor.usuario_id}}" class="effect-one" style="display: none" type="checkbox" checked>
+                            <label for="check-{{proveedor.usuario_id}}">
+                                <span class="inner"></span><span class="icon"></span>
+                            </label>{{proveedor.nombre}}
+                        </div>
+                        -->
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mv-col" style="flex-wrap: wrap">
+                <div class="foto">
+                    <span class="titulo-imagen">Imagen 1</span>
+                    <div id="slider-01-foto" class="input-foto">
+                        <ul class="enlarge">
+                            <li>
+                                <img ng-src="{{'images/'+$ctrl.foto_01.nombre}}" alt="{{$ctrl.foto_01.nombre}}"
+                                     height="36" width="36" style="background-color: #dddddd;">
+                                <span>
+                                    <img ng-src="{{'images/'+$ctrl.foto_01.nombre}}" alt="{{$ctrl.foto_01.nombre}}">
+                                </span>
+                            </li>
+                        </ul>
+                        <div class="wrapper">
+                            <div class="file-upload">
+                                <input type="file" name="images" id="images-01"
+                                       ac-upload-files="$ctrl.updateFotoProyecto(selectedFileList,1,'')"/>
+                                <i class="fa fa-arrow-up"></i>
+                            </div>
+                        </div>
+                        <button type="button" class="boton-eliminar" ng-click="$ctrl.removeFoto(1);" title="Quitar Imagen"
+                                ng-if="$ctrl.foto_01.nombre.length>0 && $ctrl.foto_01.nombre != 'no_image.png'">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="foto">
+                    <span class="titulo-imagen">Imagen 2</span>
+                    <div id="slider-02-foto" class="input-foto">
+                        <ul class="enlarge">
+                            <li>
+                                <img ng-src="{{'images/'+$ctrl.foto_02.nombre}}" alt="{{$ctrl.foto_02.nombre}}"
+                                     height="36" width="36" style="background-color: #dddddd;">
+                                <span>
+                                    <img ng-src="{{'images/'+$ctrl.foto_02.nombre}}" alt="{{$ctrl.foto_02.nombre}}">
+                                </span>
+                            </li>
+                        </ul>
+                        <div class="wrapper">
+                            <div class="file-upload">
+                                <input type="file" name="images" id="images-02"
+                                       ac-upload-files="$ctrl.updateFotoProyecto(selectedFileList,2,'')"/>
+                                <i class="fa fa-arrow-up"></i>
+                            </div>
+                        </div>
+                        <button type="button" class="boton-eliminar" ng-click="$ctrl.removeFoto(2);" title="Quitar Imagen"
+                                ng-if="$ctrl.foto_02.nombre.length>0 && $ctrl.foto_02.nombre != 'no_image.png'">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="foto">
+                    <span class="titulo-imagen">Imagen 3</span>
+                    <div id="slider-03-foto" class="input-foto">
+                        <ul class="enlarge">
+                            <li>
+                                <img ng-src="{{'images/'+$ctrl.foto_03.nombre}}" alt="{{$ctrl.foto_03.nombre}}"
+                                     height="36" width="36" style="background-color: #dddddd;">
+                                <span>
+                                    <img ng-src="{{'images/'+$ctrl.foto_03.nombre}}" alt="{{$ctrl.foto_03.nombre}}">
+                                </span>
+                            </li>
+                        </ul>
+                        <div class="wrapper">
+                            <div class="file-upload">
+                                <input type="file" name="images" id="images-03"
+                                       ac-upload-files="$ctrl.updateFotoProyecto(selectedFileList,3,'')"/>
+                                <i class="fa fa-arrow-up"></i>
+                            </div>
+                        </div>
+                        <button type="button" class="boton-eliminar" ng-click="$ctrl.removeFoto(3);" title="Quitar Imagen"
+                                ng-if="$ctrl.foto_03.nombre.length>0 && $ctrl.foto_03.nombre != 'no_image.png'">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="botonera">
+                <button type="button" class="boton-ok" ng-click="$ctrl.save();" title="Guardar">
+                    <i class="fa fa-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="boton-calendario" ng-click="$ctrl.openPrice();"title="Precio">
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="boton-cancelar" ng-click="$ctrl.cancel();"
+                        title="Cancelar">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="boton-eliminar" ng-click="$ctrl.remove();"
+                        title="Borrar">
+                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+
+
+    <form class="form-abm" form-id="abm-detalle-2" ng-class="{'form-open':$ctrl.priceOpen}">
+        <div class="detalle-container">
+            <h2>Precios por Horario</h2>
+
+            <h3>Producto</h3>
+            <div class="nombre-producto-form">{{$ctrl.producto.nombre}}</div>
+            <div class="mv-col">
+                <div class="input" data-tip="Precio oferta">
+                    <input id="precio_oferta" type="number" ng-model="$ctrl.producto.precios[0].precio"
+                           placeholder="Precio de oferta" />
+                </div>
+            </div>
+            <div class="mv-col">
+                <div class="input" data-tip="Hora desde HH:mm:ss">
+                    <input id="precio_oferta_desde" type="text" ng-model="$ctrl.producto.precios[0].hora_desde"
+                           placeholder="HH:mm:ss Desde" maxlength="8"/>
+                </div>
+                <div class="input" data-tip="Hora hasta HH:mm:ss">
+                    <input id="precio_oferta_hasta" type="text" ng-model="$ctrl.producto.precios[0].hora_hasta"
+                           placeholder="HH:mm:ss Hasta" maxlength="8"/>
+                </div>
+            </div>
+            <div class="mv-col">
+                <div class="input" data-tip="Precio Minorista">
+                    <input id="precio_minorista" type="number" ng-model="$ctrl.producto.precios[1].precio"
+                           placeholder="Precio Minorista" />
+                </div>
+            </div>
+            <div class="mv-col">
+                <div class="input" data-tip="Hora desde HH:mm:ss">
+                    <input id="precio_minorista_desde" type="text" ng-model="$ctrl.producto.precios[1].hora_desde"
+                           placeholder="HH:mm:ss Desde" maxlength="8"/>
+                </div>
+                <div class="input" data-tip="Hora hasta HH:mm:ss">
+                    <input id="precio_minorista_hasta" type="text" ng-model="$ctrl.producto.precios[1].hora_hasta"
+                           placeholder="HH:mm:ss Hasta" maxlength="8"/>
+                </div>
+            </div>
+            <div class="mv-col">
+                <div class="input" data-tip="Precio Mayorista">
+                    <input id="precio_mayorista" type="number" ng-model="$ctrl.producto.precios[2].precio"
+                           placeholder="Precio Mayorista" />
+                </div>
+            </div>
+            <div class="mv-col">
+                <div class="input" data-tip="Hora desde HH:mm:ss">
+                    <input id="precio_mayorista_desde" type="text" ng-model="$ctrl.producto.precios[2].hora_desde"
+                           placeholder="HH:mm:ss Desde" maxlength="8"/>
+                </div>
+                <div class="input" data-tip="Hora hasta HH:mm:ss">
+                    <input id="precio_mayorista_hasta" type="text" ng-model="$ctrl.producto.precios[2].hora_hasta"
+                           placeholder="HH:mm:ss Hasta" maxlength="8"/>
+                </div>
+            </div>
+
+            <div class="botonera">
+                <button type="button" class="boton-ok" ng-click="$ctrl.savePrecio();" title="Guardar">
+                    <i class="fa fa-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="boton-cancelar" ng-click="$ctrl.priceOpen=false;$ctrl.detailsOpen=true;"
+                        title="Cancelar">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

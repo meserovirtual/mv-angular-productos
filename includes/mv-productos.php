@@ -50,7 +50,7 @@ class Productos extends Main
     p.status,
     p.vendidos,
     p.destacado,
-    p.producto_tipo_id,
+    p.producto_tipo,
     p.en_slider,
     p.en_oferta,
     p.iva,

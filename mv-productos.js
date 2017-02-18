@@ -29,6 +29,7 @@
 
         //Function declarations
         service.get = get;
+        service.getProductosCliente = getProductosCliente;
         service.getByParams = getByParams;
         service.getMasVendidos = getMasVendidos;
         service.getByCategoria = getByCategoria;
@@ -111,8 +112,8 @@
                 .then(function (response) {
 
                         for (var i = 0; i < response.data.length; i++) {
-                            if(response.data[i].precios !== undefined && response.data[i].precios.length > 0) {
-                                for(var j=0; j < response.data[i].precios.length; j++){
+                            if (response.data[i].precios !== undefined && response.data[i].precios.length > 0) {
+                                for (var j = 0; j < response.data[i].precios.length; j++) {
                                     response.data[i].precios[j].precio = parseFloat(response.data[i].precios[j].precio);
                                 }
                                 //response.data[i].precios[0].precio = parseFloat(response.data[i].precios[0].precio);
@@ -139,6 +140,95 @@
                         ProductVars.paginas = (response.data.length % ProductVars.paginacion == 0) ? parseInt(response.data.length / ProductVars.paginacion) : parseInt(response.data.length / ProductVars.paginacion) + 1;
                         MvUtilsGlobals.stopWaiting();
                         return response.data;
+                    }
+                )
+                .catch(function (response) {
+                    ProductVars.clearCache = true;
+                    MvUtilsGlobals.stopWaiting();
+                    ErrorHandler(response);
+                })
+        }
+
+
+        /**
+         * @description Obtiene todos los productos
+         * @param callback
+         * @returns {*}
+         */
+        function getProductosCliente() {
+            MvUtilsGlobals.startWaiting();
+            var urlGet = url + '?function=getProductosCliente';
+            var $httpDefaultCache = $cacheFactory.get('$http');
+            var cachedData = [];
+
+
+            // Verifica si existe el cache de productos
+            if ($httpDefaultCache.get(urlGet) != undefined) {
+                if (ProductVars.clearCache) {
+                    $httpDefaultCache.remove(urlGet);
+                }
+                else {
+                    var deferred = $q.defer();
+                    cachedData = $httpDefaultCache.get(urlGet);
+                    deferred.resolve(cachedData);
+                    MvUtilsGlobals.stopWaiting();
+                    return deferred.promise;
+                }
+            }
+
+
+            return $http.get(urlGet, {cache: true})
+                .then(function (response) {
+
+                        for (var i = 0; i < response.data.length; i++) {
+                            if (response.data[i].precios !== undefined && response.data[i].precios.length > 0) {
+                                for (var j = 0; j < response.data[i].precios.length; j++) {
+                                    response.data[i].precios[j].precio = parseFloat(response.data[i].precios[j].precio);
+                                }
+
+                                for (var j = 0; j < response.data[i].kits.length; j++) {
+                                    response.data[i].kits[j].selected = {};
+                                }
+                                response.data[i].precios.sort(function (a, b) {
+                                    // Turn your strings into dates, and then subtract them
+                                    // to get a value that is either negative, positive, or zero.
+                                    return a.precio_tipo_id - b.precio_tipo_id;
+                                });
+                            }
+                            response.data[i].pto_repo = parseFloat(response.data[i].pto_repo);
+                            response.data[i].iva = parseFloat(response.data[i].iva);
+                            response.data[i].status = '' + response.data[i].status;
+                            response.data[i].en_oferta = '' + response.data[i].en_oferta;
+                            response.data[i].en_slider = '' + response.data[i].en_slider;
+                            response.data[i].destacado = '' + response.data[i].destacado;
+                            response.data[i].producto_tipo = '' + response.data[i].producto_tipo;
+                            response.data[i].cantidad = 1;
+
+                        }
+
+                        var lista_categorizada = [];
+
+                        // Ordeno por categoría para que sea fácil mostrar en la lista de productos de cara al cliente
+                        for (var i in response.data) {
+                            if (!lista_categorizada.hasOwnProperty(response.data[i].categorias[0].categoria_id)) {
+                                lista_categorizada[response.data[i].categorias[0].categoria_id] = {
+                                    nombre: response.data[i].categorias[0].nombre,
+                                    foto: response.data[i].categorias[0].foto,
+                                    productos: []
+                                };
+                            }
+                            lista_categorizada[response.data[i].categorias[0].categoria_id].productos.push(response.data[i]);
+
+                        }
+
+
+                        // console.log(lista_categorizada);
+                        // $httpDefaultCache.put(urlGet, response.data);
+                        $httpDefaultCache.put(urlGet, lista_categorizada);
+                        ProductVars.clearCache = false;
+                        ProductVars.paginas = (response.data.length % ProductVars.paginacion == 0) ? parseInt(response.data.length / ProductVars.paginacion) : parseInt(response.data.length / ProductVars.paginacion) + 1;
+                        MvUtilsGlobals.stopWaiting();
+                        return lista_categorizada;
                     }
                 )
                 .catch(function (response) {
@@ -1041,8 +1131,6 @@
         };
 
     }
-
-
 
 
     ProductTypeService.$inject = ['$http', 'ProductTypeVars', '$cacheFactory', 'MvUtils', 'MvUtilsGlobals', 'ErrorHandler', '$q'];

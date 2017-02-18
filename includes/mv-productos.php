@@ -277,6 +277,261 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         echo json_encode(array_values($final));
     }
 
+
+    /* @name: get
+     * @param
+     * @description: Obtiene todos los usuario con sus direcciones.
+     * todo: Sacar dirección y crear sus propias clases dentro de este mismo módulo.
+     */
+    function getProductosCliente()
+    {
+        $db = self::$instance->db;
+        $results = $db->rawQuery('SELECT
+    p.producto_id,
+    p.nombre nombreProducto,
+    p.descripcion,
+    p.pto_repo,
+    p.sku,
+    p.status,
+    p.vendidos,
+    p.destacado,
+    p.producto_tipo_id,
+    p.en_slider,
+    p.en_oferta,
+    p.iva,
+    c.categoria_id,
+    c.nombre nombreCategoria,
+    c.parent_id,
+    c.status,
+    ps.producto_kit_id,
+    ps.producto_id productoKit,
+    ps.producto_cantidad,
+    (select nombre from productos where producto_id = ps.producto_id) nombreKit,
+    ps.opcional,
+    ps.precio,
+    pr.precio_id,
+    pr.precio_tipo_id,
+    pr.precio,
+    ph.horario_id,
+    ph.hora_desde,
+    ph.hora_hasta,
+    f.producto_foto_id,
+    f.main,
+    f.nombre nombreFoto,
+    u.usuario_id,
+    u.nombre nombreUsuario,
+    u.apellido
+FROM
+    productos p
+        LEFT JOIN
+    productos_categorias pc ON p.producto_id = pc.producto_id
+        LEFT JOIN
+    categorias c ON c.categoria_id = pc.categoria_id
+        LEFT JOIN
+    precios pr ON p.producto_id = pr.producto_id
+        LEFT JOIN
+    precios_horario ph ON pr.precio_id = ph.precio_id
+        LEFT JOIN
+    productos_fotos f ON p.producto_id = f.producto_id
+        LEFT JOIN
+    productos_kits ps ON p.producto_id = ps.parent_id
+        LEFT JOIN
+    productos_proveedores pro ON pro.producto_id = p.producto_id
+        LEFT JOIN
+    usuarios u ON u.usuario_id = pro.proveedor_id
+WHERE ph.hora_desde < CAST("' . date('H:i') . '" AS time) AND ph.hora_hasta > CAST("' . date('H:i') . '" AS time)    
+GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
+p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , c.categoria_id ,
+c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
+pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido;');
+
+
+
+
+        $final = array();
+        foreach ($results as $row) {
+
+            if (!isset($final[$row["producto_id"]])) {
+                $final[$row["producto_id"]] = array(
+                    'producto_id' => $row["producto_id"],
+                    'nombre' => $row["nombreProducto"],
+                    'descripcion' => $row["descripcion"],
+                    'pto_repo' => $row["pto_repo"],
+                    'sku' => $row["sku"],
+                    'status' => $row["status"],
+                    'vendidos' => $row["vendidos"],
+                    'destacado' => $row["destacado"],
+                    'producto_tipo_id' => $row["producto_tipo_id"],
+                    'en_slider' => $row["en_slider"],
+                    'en_oferta' => $row["en_oferta"],
+                    'iva' => $row["iva"],
+                    'categorias' => array(),
+                    'precios' => array(),
+                    'fotos' => array(),
+                    'kits' => array(),
+                    'proveedores' => array()
+                );
+            }
+            $have_cat = false;
+            if ($row["categoria_id"] !== null) {
+
+                if (sizeof($final[$row['producto_id']]['categorias']) > 0) {
+                    foreach ($final[$row['producto_id']]['categorias'] as $cat) {
+                        if ($cat['categoria_id'] == $row["categoria_id"]) {
+                            $have_cat = true;
+                        }
+                    }
+                } else {
+                    $final[$row['producto_id']]['categorias'][] = array(
+                        'categoria_id' => $row['categoria_id'],
+                        'nombre' => $row['nombreCategoria'],
+                        'parent_id' => $row['parent_id'],
+                        'status' => $row['status']
+                    );
+
+                    $have_cat = true;
+                }
+
+                if (!$have_cat) {
+                    array_push($final[$row['producto_id']]['categorias'], array(
+                        'categoria_id' => $row['categoria_id'],
+                        'nombre' => $row['nombreCategoria'],
+                        'parent_id' => $row['parent_id'],
+                        'status' => $row['status']
+                    ));
+                }
+            }
+
+
+            $have_pre = false;
+            if ($row["precio_id"] !== null) {
+
+                if (sizeof($final[$row['producto_id']]['precios']) > 0) {
+                    foreach ($final[$row['producto_id']]['precios'] as $cat) {
+                        if ($cat['precio_id'] == $row["precio_id"]) {
+                            $have_pre = true;
+                        }
+                    }
+                } else {
+                    $final[$row['producto_id']]['precios'][] = array(
+                        'precio_id' => $row['precio_id'],
+                        'precio_tipo_id' => $row['precio_tipo_id'],
+                        'precio' => $row['precio'],
+                        'horario_id' => $row['horario_id'],
+                        'hora_desde' => $row['hora_desde'],
+                        'hora_hasta' => $row['hora_hasta']
+                    );
+
+                    $have_pre = true;
+                }
+
+                if (!$have_pre) {
+                    array_push($final[$row['producto_id']]['precios'], array(
+                        'precio_id' => $row['precio_id'],
+                        'precio_tipo_id' => $row['precio_tipo_id'],
+                        'precio' => $row['precio'],
+                        'horario_id' => $row['horario_id'],
+                        'hora_desde' => $row['hora_desde'],
+                        'hora_hasta' => $row['hora_hasta']
+                    ));
+                }
+            }
+
+
+            $have_fot = false;
+            if ($row["producto_foto_id"] !== null) {
+
+                if (sizeof($final[$row['producto_id']]['fotos']) > 0) {
+                    foreach ($final[$row['producto_id']]['fotos'] as $cat) {
+                        if ($cat['producto_foto_id'] == $row["producto_foto_id"]) {
+                            $have_fot = true;
+                        }
+                    }
+                } else {
+                    $final[$row['producto_id']]['fotos'][] = array(
+                        'producto_foto_id' => $row['producto_foto_id'],
+                        'nombre' => $row['nombreFoto'],
+                        'main' => $row['main']
+                    );
+
+                    $have_fot = true;
+                }
+
+                if (!$have_fot) {
+                    array_push($final[$row['producto_id']]['fotos'], array(
+                        'producto_foto_id' => $row['producto_foto_id'],
+                        'nombre' => $row['nombreFoto'],
+                        'main' => $row['main']
+                    ));
+                }
+            }
+
+            $have_kit = false;
+            if ($row["producto_kit_id"] !== null) {
+
+                if (sizeof($final[$row['producto_id']]['kits']) > 0) {
+                    foreach ($final[$row['producto_id']]['kits'] as $cat) {
+                        if ($cat['producto_kit_id'] == $row["producto_kit_id"]) {
+                            $have_kit = true;
+                        }
+                    }
+                } else {
+                    $final[$row['producto_id']]['kits'][] = array(
+                        'producto_kit_id' => $row['producto_kit_id'],
+                        'nombre' => $row['nombreKit'],
+                        'producto_id' => $row['productoKit'],
+                        'producto_cantidad' => $row['producto_cantidad'],
+                        'opcional' => $row['opcional'],
+                        'precio' => $row['precio']
+                    );
+
+                    $have_kit = true;
+                }
+
+                if (!$have_kit) {
+                    array_push($final[$row['producto_id']]['kits'], array(
+                        'producto_kit_id' => $row['producto_kit_id'],
+                        'nombre' => $row['nombreKit'],
+                        'producto_id' => $row['productoKit'],
+                        'producto_cantidad' => $row['producto_cantidad'],
+                        'opcional' => $row['opcional'],
+                        'precio' => $row['precio']
+                    ));
+                }
+            }
+
+
+            $have_pro = false;
+            if ($row["usuario_id"] !== null) {
+
+                if (sizeof($final[$row['producto_id']]['proveedores']) > 0) {
+                    foreach ($final[$row['producto_id']]['proveedores'] as $cat) {
+                        if ($cat['usuario_id'] == $row["usuario_id"]) {
+                            $have_pro = true;
+                        }
+                    }
+                } else {
+                    $final[$row['producto_id']]['proveedores'][] = array(
+                        'usuario_id' => $row['usuario_id'],
+                        'nombre' => $row['nombreUsuario'],
+                        'apellido' => $row['apellido']
+                    );
+
+                    $have_pro = true;
+                }
+
+                if (!$have_pro) {
+                    array_push($final[$row['producto_id']]['proveedores'], array(
+                        'usuario_id' => $row['usuario_id'],
+                        'nombre' => $row['nombreUsuario'],
+                        'apellido' => $row['apellido']
+                    ));
+                }
+            }
+        }
+        echo json_encode(array_values($final));
+    }
+
     /**
      * @descr Obtiene las categorias
      */
@@ -436,7 +691,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             );
             $precio_id = $db->insert('precios', $data);
 
-            if($precio_id > -1){
+            if ($precio_id > -1) {
                 $horario_decoded = self::checkPrecioHorario($precio);
 
                 $data = array(
@@ -446,7 +701,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                 );
                 $horario_id = $db->insert('precios_horario', $data);
 
-                if($horario_id > -1) {
+                if ($horario_id > -1) {
                     $db->commit();
                     header('HTTP/1.0 200 Ok');
                     //echo json_encode($horario_id);
@@ -507,7 +762,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             $error = true;
         }
 
-        if(!$error) {
+        if (!$error) {
             $db = self::$instance->db;
             $db->startTransaction();
             $categoria_decoded = self::checkCategoria(json_decode($params["categoria"]));
@@ -616,7 +871,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             $error = true;
         }
 
-        if(!$error) {
+        if (!$error) {
             $db = self::$instance->db;
             $db->startTransaction();
             $producto_tipo_decoded = self::checkProductoTipo(json_decode($params["productoTipo"]));
@@ -795,7 +1050,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             );
 
             $result = $db->update('precios', $data);
-            if($result){
+            if ($result) {
                 $horario_decoded = self::checkPrecioHorario($precio);
 
                 $db->where('horario_id', $precio->horario_id);
@@ -806,7 +1061,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                 );
                 $result = $db->update('precios_horario', $data);
 
-                if($result) {
+                if ($result) {
                     $db->commit();
                     header('HTTP/1.0 200 Ok');
                     //echo json_encode($horario_id);
@@ -849,7 +1104,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             $error = true;
         }
 
-        if(!$error) {
+        if (!$error) {
             $db = self::$instance->db;
             $db->startTransaction();
             $categoria_decoded = self::checkCategoria(json_decode($params["categoria"]));
@@ -903,7 +1158,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             $error = true;
         }
 
-        if(!$error) {
+        if (!$error) {
             $db = self::$instance->db;
             $db->startTransaction();
             $producto_tipo_decoded = self::checkProductoTipo(json_decode($params["productoTipo"]));
@@ -969,7 +1224,6 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             echo $db->getLastError();
         }
     }
-
 
 
     /**

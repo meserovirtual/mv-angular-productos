@@ -2,7 +2,8 @@
     'use strict';
 
     angular.module('mvProductosInsite', [])
-        .component('mvProductosInsite', mvProductosInsite());
+        .component('mvProductosInsite', mvProductosInsite())
+        .service('mvProductoInsiteService', MvProductoInsiteService);
 
     function mvProductosInsite() {
         return {
@@ -10,28 +11,28 @@
                 searchFunction: '&'
             },
             templateUrl: window.installPath + '/mv-angular-productos/mv-productos-insite.html',
-            controller: MvProductosController
+            controller: MvProductosInsiteController
         }
     }
 
-    MvProductosController.$inject = ["ProductVars", 'ProductService', "MvUtils", "CategoryService", "UserService", "$scope",
-        "UploadVars", "UploadService", "ProductTypeService"];
+    MvProductosInsiteController.$inject = ["ProductVars", 'ProductService', "MvUtils", "CategoryService", "mvProductoInsiteService", "$scope"];
     /**
      * @param AcProductos
      * @constructor
      */
-    function MvProductosController(ProductVars, ProductService, MvUtils, CategoryService, UserService, $scope, UploadVars,
-                                   UploadService, ProductTypeService) {
+    function MvProductosInsiteController(ProductVars, ProductService, MvUtils, CategoryService, mvProductoInsiteService, $scope) {
         var vm = this;
 
         vm.productos = [];
         vm.producto = {};
         vm.categorias = [];
+        vm.opcionales = {};
 
         vm.save = save;
         vm.cancel = cancel;
         vm.get = get;
 
+        get();
 
         CategoryService.get().then(function(data){
             vm.categorias = data;
@@ -39,17 +40,22 @@
 
         
         function save(){
-
+            mvProductoInsiteService.producto = vm.producto;
+            mvProductoInsiteService.broadcast();
+            vm.detailsOpen = false;
+            vm.producto = {};
         }
 
         function get(){
-            ProductService.get().then(function (data) {
-                // setData(data);
+            ProductService.getProductosCliente().then(function (data) {
+                vm.productos = data;
                 console.log(data);
             });
         }
 
         function cancel() {
+            vm.detailsOpen= false;
+            vm.producto = {};
         }
 
 
@@ -84,6 +90,19 @@
             paginar(MvUtils.goToPagina(vm.pagina, ProductVars));
         }
 
+    }
+
+
+    MvProductoInsiteService.$inject = ['$rootScope'];
+    function MvProductoInsiteService($rootScope){
+        this.broadcast = function () {
+            $rootScope.$broadcast("MvProductoInsiteService")
+        };
+        this.listen = function (callback) {
+            $rootScope.$on("MvProductoInsiteService", callback)
+        };
+
+        this.producto = {};
     }
 
 

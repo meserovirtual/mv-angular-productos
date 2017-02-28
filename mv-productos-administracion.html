@@ -141,11 +141,16 @@
             </div>
             <div class="mv-col" data-tip="Descripción">
                 <textarea id="descripcion" name="descripcion" ng-model="$ctrl.producto.descripcion"
-                        max-length="2000;{{'ERROR_MAX_LENGTH' | xlat:{campo:('DESCRIPTION'|xlat), length:('2000')} }}"
-                        placeholder="{{'DESCRIPTION'|xlat}}"></textarea>
+                          max-length="2000;{{'ERROR_MAX_LENGTH' | xlat:{campo:('DESCRIPTION'|xlat), length:('2000')} }}"
+                          placeholder="{{'DESCRIPTION'|xlat}}"></textarea>
             </div>
 
             <div class="mv-col">
+                <label class="label--checkbox" ng-click="$ctrl.showProveedores=!$ctrl.showProveedores">
+                    <input type="checkbox" class="checkbox" id="check-showProveedores" ng-checked="$ctrl.showProveedores">Mostrar Proveedores
+                </label>
+            </div>
+            <div class="mv-col hide-panel" ng-class="{'show-panel':$ctrl.showProveedores}">
                 <div class="panel panel-primary">
                     <div class="panel-heading">Proveedores</div>
                     <div class="panel-body">
@@ -166,6 +171,59 @@
                             </label>{{proveedor.nombre}}
                         </div>
                         -->
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mv-col">
+                <label class="label--checkbox" ng-click="$ctrl.showProductoCompuesto=!$ctrl.showProductoCompuesto">
+                    <input type="checkbox" class="checkbox" id="check-showProductoCompuesto" ng-checked="$ctrl.showProductoCompuesto">Mostrar Producto Compuesto
+                </label>
+            </div>
+            <div class="mv-col hide-panel" ng-class="{'show-panel':$ctrl.showProductoCompuesto}">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Producto Compuesto</div>
+                    <div class="panel-body">
+                        <div class="mv-col">
+                            <div class="input" data-tip="Producto">
+                                <mv-autocomplete fields-to-show="'nombre'"
+                                                 selected-to="$ctrl.producto_para_kit"
+                                                 search-fields="'nombre,sku'"
+                                                 search-function="$ctrl.searchProductoKit(callback)"
+                                                 id="searchProducto"></mv-autocomplete>
+                            </div>
+
+                            <button type="button" class="boton-ok" ng-click="$ctrl.agregarKit();" title="Guardar">
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div class="mv-col">
+                            <label>Agregados</label>
+                        </div>
+                        <div class="mv-col">
+                            <table class="" style="width: 100%">
+                                <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Acción</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="row in $ctrl.producto.kits">
+                                    <td>
+                                        {{row.nombre}}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="boton-eliminar btn-small" ng-click="$ctrl.quitarKit($ctrl.row);" title="Borrar">
+                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 

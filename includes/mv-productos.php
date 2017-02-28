@@ -627,7 +627,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             }
 
             // Solo para cuando es kit
-            if ($product_decoded->producto_tipo_id == 2) {
+            //if ($product_decoded->producto_tipo_id == 2) {
                 foreach ($product_decoded->kits as $kit) {
                     if (!self::createKits($kit, $result, $db)) {
                         $db->rollback();
@@ -636,7 +636,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                         return;
                     }
                 }
-            }
+            //}
 
 
             $db->commit();

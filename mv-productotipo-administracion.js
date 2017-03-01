@@ -106,13 +106,11 @@
             } else {
                 var result = confirm('¿Esta seguro que desea eliminar el registro seleccionada?');
                 if(result) {
-                    ProductTypeService.remove(vm.productoTipo.producto_tipo_id).then(function(data){
+                    ProductTypeService.remove(vm.productoTipo.producto_tipo_id, function(data){
                         vm.productoTipo = {};
                         vm.detailsOpen = false;
                         loadProductosTipo();
                         MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
-                    }).catch(function(data){
-                        console.log(data);
                     });
                 }
             }

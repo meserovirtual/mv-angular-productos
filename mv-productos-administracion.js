@@ -15,13 +15,13 @@
     }
 
     MvProductosController.$inject = ["ProductVars", 'ProductService', "MvUtils", "CategoryService", "UserService", "$scope",
-        "UploadVars", "UploadService", "ProductTypeService", 'MvUtilsGlobals', 'StockService', 'StockVars'];
+        "UploadVars", "UploadService", "ProductTypeService"];
     /**
      * @param AcProductos
      * @constructor
      */
     function MvProductosController(ProductVars, ProductService, MvUtils, CategoryService, UserService, $scope, UploadVars,
-                                   UploadService, ProductTypeService, MvUtilsGlobals, StockService, StockVars) {
+                                   UploadService, ProductTypeService) {
         var vm = this;
 
         vm.productos = [];
@@ -41,12 +41,6 @@
         vm.destacado = false;
         vm.status = true;
         vm.update = false;
-        vm.showProveedores = false;
-        vm.showProductoCompuesto = false;
-        vm.clear = true;
-        StockVars.clearCache = true;
-        vm.producto_para_kit = {};
-        vm.productos_en_kit = [];
 
 
         vm.foto_01 = {nombre: 'no_image.png'};
@@ -76,7 +70,6 @@
         vm.setCheckBox = setCheckBox;
 
 
-
         var element1 = angular.element(document.getElementById('nombre'));
         var element2 = angular.element(document.getElementById('precio_oferta'));
         var element3 = angular.element(document.getElementById('precio_oferta_desde'));
@@ -103,10 +96,6 @@
         });
 
         function removeFocus() { }
-
-        document.getElementById('searchProducto').getElementsByTagName('input')[0].addEventListener('blur', function (event) {
-            console.log('busco');
-        });
 
         loadProductos();
 
@@ -234,17 +223,17 @@
         }
 
         /*
-         $scope.$watch('$ctrl.producto', function () {
-         vm.listProveedores = [];
-         if (vm.producto.proveedores == undefined) {
-         return;
-         }
+        $scope.$watch('$ctrl.producto', function () {
+            vm.listProveedores = [];
+            if (vm.producto.proveedores == undefined) {
+                return;
+            }
 
-         for (var i in vm.producto.proveedores) {
-         vm.listProveedores[vm.producto.proveedores[i].usuario_id] = true;
-         }
-         });
-         */
+            for (var i in vm.producto.proveedores) {
+                vm.listProveedores[vm.producto.proveedores[i].usuario_id] = true;
+            }
+        });
+        */
 
         function save() {
             if(vm.producto.nombre == undefined || vm.producto.nombre.length == 0){
@@ -280,10 +269,8 @@
             vm.producto.en_slider = vm.en_slider ? 1 : 0;
             vm.producto.destacado = vm.destacado ? 1 : 0;
 
-            console.log(vm.producto);
-
             ProductService.save(vm.producto).then(function (data) {
-                console.log(data);
+                //console.log(data);
                 vm.detailsOpen = (data === undefined || data < 0) ? true : false;
                 if(data == undefined) {
                     element1[0].classList.add('error-input');
@@ -345,7 +332,7 @@
                 }
             }
 
-            console.log(vm.producto);
+            //console.log(vm.producto);
 
             if(vm.producto.producto_id === undefined) {
                 MvUtils.showMessage('error', 'Debe seleccionar un Producto');
@@ -367,9 +354,9 @@
                         vm.priceOpen = false;
                     }
                 })
-                    .catch(function (data) {
-                        vm.producto = {};
-                    });
+                .catch(function (data) {
+                    vm.producto = {};
+                });
             }
         }
 
@@ -404,10 +391,6 @@
         }
 
         function agregarKit() {
-            console.log(vm.producto.kits);
-            if(vm.producto.kits == undefined)
-                vm.producto.kits = [];
-
             vm.producto.kits.push({
                 producto_cantidad: 1,
                 producto_id: vm.producto_para_kit.producto_id,
@@ -420,6 +403,7 @@
         function quitarKit(producto_kit) {
             for (var i = 0; i < vm.producto.kits.length; i++) {
                 if (producto_kit.producto_id == vm.producto.kits[i].producto_id) {
+
                     vm.producto.kits.splice(i, 1);
                 }
             }
@@ -443,12 +427,10 @@
             } else {
                 var result = confirm('¿Esta seguro que desea eliminar el producto seleccionado?');
                 if(result) {
-                    ProductService.remove(vm.producto.producto_id).then(function(data){
+                    ProductService.remove(vm.producto.producto_id, function(data){
                         vm.producto = {};
                         cleanProducto();
                         loadProductos();
-                    }).catch(function(data){
-                        console.log(data);
                     });
                 }
             }
@@ -467,7 +449,6 @@
             cleanProducto();
             loadProductos();
         }
-
 
 
         // Implementación de la paginación

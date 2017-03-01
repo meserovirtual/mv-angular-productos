@@ -443,10 +443,12 @@
             } else {
                 var result = confirm('¿Esta seguro que desea eliminar el producto seleccionado?');
                 if(result) {
-                    ProductService.remove(vm.producto.producto_id, function(data){
+                    ProductService.remove(vm.producto.producto_id).then(function(data){
                         vm.producto = {};
                         cleanProducto();
                         loadProductos();
+                    }).catch(function(data){
+                        console.log(data);
                     });
                 }
             }

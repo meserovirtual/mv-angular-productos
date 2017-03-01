@@ -294,18 +294,17 @@
          * @param callback
          * @description: Elimina el producto seleccionado.
          */
-        function remove(producto_id, callback) {
+        function remove(producto_id) {
             return $http.post(url,
                 {function: 'removeProducto', 'producto_id': producto_id})
-                .success(function (data) {
+                .then(function (data) {
                     //console.log(data);
-                    if (data !== 'false') {
-                        ProductVars.clearCache = true;
-                        callback(data);
-                    }
+                    ProductVars.clearCache = true;
+                    return data;
                 })
-                .error(function (data) {
-                    callback(data);
+                .catch(function (data) {
+                    ProductVars.clearCache = true;
+                    ErrorHandler(data)
                 })
         }
 
@@ -1201,20 +1200,19 @@
          * @param callback
          * @description: Elimina el tipo de producto seleccionado
          */
-        function remove(producto_tipo_id, callback) {
+        function remove(producto_tipo_id) {
             return $http.post(url,
                 {
                     'function': 'removeProductoTipo',
                     'producto_tipo_id': producto_tipo_id
                 })
-                .success(function (data) {
-                    if (data !== 'false') {
-                        ProductTypeVars.clearCache = true;
-                        callback(data);
-                    }
+                .then(function (data) {
+                    ProductTypeVars.clearCache = true;
+                    return data;
                 })
-                .error(function (data) {
-                    callback(data);
+                .catch(function (data) {
+                    ProductTypeVars.clearCache = true;
+                    ErrorHandler(data);
                 })
         }
 

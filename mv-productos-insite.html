@@ -9,39 +9,45 @@
 
 
         <div>
-            <div ng-repeat="row in $ctrl.productos track by $index">
-                <span style="font-weight: bold">{{row.nombre}}</span>
-                <div ng-repeat="prod in row.productos | filter:$ctrl.filtro"
+            <div ng-repeat="row in $ctrl.productos track by $index" ng-if="row.nombre != undefined">
+                <span class="productos-insite-categoria-titulo">{{row.nombre}}</span>
+                <img class="productos-insite-categoria-imagen" ng-src="row.photo"/>
+                <div class="productos-insite-producto"
+                     ng-repeat="prod in row.productos | filter:$ctrl.filtro"
                      ng-click="$ctrl.producto = prod; $ctrl.detailsOpen = true;">
-                    {{prod.nombre}} {{prod.precios[0].precio | currency}}
+                    <span class="productos-insite-nombre">{{prod.nombre}}</span>
+                    <span class="productos-insite-precio">{{prod.precios[0].precio | currency}}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <form class="form-abm" form-id="abm-detalle" ng-class="{'form-open':$ctrl.detailsOpen}">
+    <form class="productos-insite-detalle form-abm" form-id="abm-detalle" ng-class="{'form-open':$ctrl.detailsOpen}">
         <div class="detalle-container">
-            <div class="mv-col">
-                <label ng-bind="$ctrl.producto.nombre"></label>
-                <label ng-bind="$ctrl.producto.precios[0].precio | currency"></label>
-                <label ng-bind="$ctrl.producto.descripcion"></label>
-
-
+            <div class="productos-insite-producto-top">
+                <label class="productos-insite-producto-titulo" ng-bind="$ctrl.producto.nombre"></label>
+                <label class="productos-insite-producto-precio"
+                       ng-bind="$ctrl.producto.precios[0].precio | currency"></label>
             </div>
-            <span ng-if="$ctrl.producto.kits.length >0">Guarniciones</span>
-            <div class="mv-col">
-                <span ng-repeat="acomp in $ctrl.producto.kits track by $index">
-                    <input ng-if="acomp.opcional == 1" type="checkbox"
+            <span class="productos-insite-producto-description" ng-bind="$ctrl.producto.descripcion"></span>
+            <span class="productos-insite-producto-guar-titulo"
+                  ng-if="$ctrl.producto.kits.length >0">Guarniciones</span>
+            <span class="productos-insite-producto-guarnicion" ng-if="acomp.opcional == 1" ng-repeat="acomp in $ctrl.producto.kits track by $index">
+                    <input type="checkbox"
                            ng-model="acomp.selected"
-                           name="acomp.nombre">{{acomp.nombre}} {{acomp.precio | currency}}<br></span>
-            </div>
+                           name="acomp.nombre">{{acomp.nombre}} {{acomp.precio | currency}}<br>
+            </span>
 
-            <div>
-                <button ng-click="$ctrl.producto.cantidad = ($ctrl.producto.cantidad ==1)? 1 : $ctrl.producto.cantidad- 1">-</button>
+            <div class="productos-insite-producto-add-remove">
+                <button ng-click="$ctrl.producto.cantidad = ($ctrl.producto.cantidad ==1)? 1 : $ctrl.producto.cantidad- 1">
+                    -
+                </button>
                 {{$ctrl.producto.cantidad}}
                 <button ng-click="$ctrl.producto.cantidad = $ctrl.producto.cantidad+ 1">+</button>
             </div>
-            <textarea name="" id="" ng-model="acomp.comentario" cols="30" rows="10"></textarea>
+            <textarea name="" id="" ng-model="$ctrl.producto.comentarios" ng-init="$ctrl.producto.comentarios = ''"
+                      cols="30" rows="10"
+                      class="productos-insite-producto-comentario"></textarea>
 
             <div class="botonera">
                 <button type="button" class="boton-ok" ng-click="$ctrl.save();" title="Guardar">

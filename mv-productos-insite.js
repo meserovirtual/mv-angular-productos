@@ -3,7 +3,7 @@
 
     angular.module('mvProductosInsite', [])
         .component('mvProductosInsite', mvProductosInsite())
-        .service('mvProductoInsiteService', MvProductoInsiteService);
+        .service('ProductoInsiteService', ProductoInsiteService);
 
     function mvProductosInsite() {
         return {
@@ -15,12 +15,12 @@
         }
     }
 
-    MvProductosInsiteController.$inject = ["ProductVars", 'ProductService', "MvUtils", "CategoryService", "mvProductoInsiteService", "$scope"];
+    MvProductosInsiteController.$inject = ["ProductVars", 'ProductService', "MvUtils", "CategoryService", "ProductoInsiteService", "$scope"];
     /**
      * @param AcProductos
      * @constructor
      */
-    function MvProductosInsiteController(ProductVars, ProductService, MvUtils, CategoryService, mvProductoInsiteService, $scope) {
+    function MvProductosInsiteController(ProductVars, ProductService, MvUtils, CategoryService, ProductoInsiteService, $scope) {
         var vm = this;
 
         vm.productos = [];
@@ -40,8 +40,8 @@
 
         
         function save(){
-            mvProductoInsiteService.producto = vm.producto;
-            mvProductoInsiteService.broadcast();
+            ProductoInsiteService.producto = vm.producto;
+            ProductoInsiteService.broadcast();
             vm.detailsOpen = false;
             vm.producto = {};
         }
@@ -93,8 +93,8 @@
     }
 
 
-    MvProductoInsiteService.$inject = ['$rootScope'];
-    function MvProductoInsiteService($rootScope){
+    ProductoInsiteService.$inject = ['$rootScope'];
+    function ProductoInsiteService($rootScope){
         this.broadcast = function () {
             $rootScope.$broadcast("MvProductoInsiteService")
         };

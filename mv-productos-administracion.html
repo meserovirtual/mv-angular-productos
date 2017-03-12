@@ -68,6 +68,10 @@
                     <input id="nombre" type="text" ng-model="$ctrl.producto.nombre" placeholder="Nombre"
                            autocomplete="off" maxlength="100"/>
                 </div>
+                <div class="input" data-tip="Punto Reposición" style="margin-left: 10px;">
+                    <input id="pto_repo" type="number" ng-model="$ctrl.producto.pto_repo"
+                           placeholder="Punto Reposición" max="99999" />
+                </div>
             </div>
             <div class="mv-col">
                 <div class="mdl-selectfield">
@@ -84,16 +88,6 @@
                             class="browser-default">
                     </select>
                 </div>
-                <!--
-                <div class="mdl-selectfield">
-                    <label>Estado</label>
-                    <select name="status" id="status" ng-model="$ctrl.producto.status" class="browser-default">
-                        <option value="" disabled selected>Estado</option>
-                        <option value="1" selected>Activo</option>
-                        <option value="0">Inactivo</option>
-                    </select>
-                </div>
-                -->
             </div>
             <div class="mv-col">
                 <label class="label--checkbox" ng-click="$ctrl.en_oferta=!$ctrl.en_oferta">
@@ -109,43 +103,18 @@
                     <input type="checkbox" class="checkbox" id="check-status" ng-checked="$ctrl.status">Activo
                 </label>
             </div>
-            <div class="mv-col">
-                <!--
-                <div class="mdl-selectfield">
-                    <label>Oferta</label>
-                    <select name="en_oferta" id="en_oferta" ng-model="$ctrl.producto.en_oferta" class="browser-default">
-                        <option value="" disabled selected>Oferta</option>
-                        <option value="1" selected>Si</option>
-                        <option value="0">No</option>
-                    </select>
-                </div>
-                <div class="mdl-selectfield">
-                    <label>En slider</label>
-                    <select name="en_slider" id="en_slider" ng-model="$ctrl.producto.en_slider" class="browser-default">
-                        <option value="" disabled selected>En slider</option>
-                        <option value="1" selected>Si</option>
-                        <option value="0">No</option>
-                    </select>
-                </div>
-                -->
-                <!--
-                <div class="mdl-selectfield">
-                    <label>Destacado</label>
-                    <select name="destacado" id="destacado" ng-model="$ctrl.producto.destacado" class="browser-default">
-                        <option value="" disabled selected>Destacado</option>
-                        <option value="1">Si</option>
-                        <option value="0" selected>No</option>
-                    </select>
-                </div>
-                -->
-            </div>
             <div class="mv-col" data-tip="Descripción">
                 <textarea id="descripcion" name="descripcion" ng-model="$ctrl.producto.descripcion"
-                        max-length="2000;{{'ERROR_MAX_LENGTH' | xlat:{campo:('DESCRIPTION'|xlat), length:('2000')} }}"
-                        placeholder="{{'DESCRIPTION'|xlat}}"></textarea>
+                          max-length="2000;{{'ERROR_MAX_LENGTH' | xlat:{campo:('DESCRIPTION'|xlat), length:('2000')} }}"
+                          placeholder="{{'DESCRIPTION'|xlat}}"></textarea>
             </div>
 
             <div class="mv-col">
+                <label class="label--checkbox" ng-click="$ctrl.showProveedores=!$ctrl.showProveedores">
+                    <input type="checkbox" class="checkbox" id="check-showProveedores" ng-checked="$ctrl.showProveedores">Mostrar Proveedores
+                </label>
+            </div>
+            <div class="mv-col hide-panel" ng-class="{'show-panel':$ctrl.showProveedores}">
                 <div class="panel panel-primary">
                     <div class="panel-heading">Proveedores</div>
                     <div class="panel-body">
@@ -171,6 +140,59 @@
 
             </div>
 
+            <div class="mv-col">
+                <label class="label--checkbox" ng-click="$ctrl.showProductoCompuesto=!$ctrl.showProductoCompuesto">
+                    <input type="checkbox" class="checkbox" id="check-showProductoCompuesto" ng-checked="$ctrl.showProductoCompuesto">Mostrar Producto Compuesto
+                </label>
+            </div>
+            <div class="mv-col hide-panel" ng-class="{'show-panel':$ctrl.showProductoCompuesto}">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Producto Compuesto</div>
+                    <div class="panel-body">
+                        <div class="mv-col">
+                            <div class="input" data-tip="Producto">
+                                <mv-autocomplete fields-to-show="'nombre'"
+                                                 selected-to="$ctrl.producto_para_kit"
+                                                 search-fields="'nombre,sku'"
+                                                 search-function="$ctrl.searchProductoKit(callback)"
+                                                 id="searchProducto"></mv-autocomplete>
+                            </div>
+
+                            <button type="button" class="boton-ok" ng-click="$ctrl.agregarKit();" title="Guardar">
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div class="mv-col">
+                            <label>Agregados</label>
+                        </div>
+                        <div class="mv-col">
+                            <table class="" style="width: 100%">
+                                <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Acción</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="row in $ctrl.producto.kits">
+                                    <td>
+                                        {{row.nombre}}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="boton-eliminar btn-small" ng-click="$ctrl.quitarKit($ctrl.row);" title="Borrar">
+                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
             <div class="mv-col" style="flex-wrap: wrap">
                 <div class="foto">
                     <span class="titulo-imagen">Imagen 1</span>
@@ -187,7 +209,7 @@
                         <div class="wrapper">
                             <div class="file-upload">
                                 <input type="file" name="images" id="images-01"
-                                       ac-upload-files="$ctrl.updateFotoProyecto(selectedFileList,1,'')"/>
+                                       mv-upload-files="$ctrl.updateFotoProyecto(selectedFileList,1,'')"/>
                                 <i class="fa fa-arrow-up"></i>
                             </div>
                         </div>
@@ -212,7 +234,7 @@
                         <div class="wrapper">
                             <div class="file-upload">
                                 <input type="file" name="images" id="images-02"
-                                       ac-upload-files="$ctrl.updateFotoProyecto(selectedFileList,2,'')"/>
+                                       mv-upload-files="$ctrl.updateFotoProyecto(selectedFileList,2,'')"/>
                                 <i class="fa fa-arrow-up"></i>
                             </div>
                         </div>
@@ -237,7 +259,7 @@
                         <div class="wrapper">
                             <div class="file-upload">
                                 <input type="file" name="images" id="images-03"
-                                       ac-upload-files="$ctrl.updateFotoProyecto(selectedFileList,3,'')"/>
+                                       mv-upload-files="$ctrl.updateFotoProyecto(selectedFileList,3,'')"/>
                                 <i class="fa fa-arrow-up"></i>
                             </div>
                         </div>

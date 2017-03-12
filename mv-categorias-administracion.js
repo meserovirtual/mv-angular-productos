@@ -102,11 +102,13 @@
             } else {
                 var result = confirm('¿Esta seguro que desea eliminar la categoria seleccionada?');
                 if(result) {
-                    CategoryService.remove(vm.categoria.categoria_id, function(data){
+                    CategoryService.remove(vm.categoria.categoria_id).then(function(data){
                         vm.categoria = {};
                         vm.detailsOpen = false;
                         loadCategorias();
                         MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
+                    }).catch(function(data){
+                        console.log(data);
                     });
                 }
             }

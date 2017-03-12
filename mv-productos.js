@@ -496,22 +496,20 @@
          * @param callback
          * @description: Elimina el categoria seleccionado.
          */
-        function remove(categoria_id, callback) {
+        function remove(categoria_id) {
             return $http.post(url,
                 {
                     'function': 'removeCategoria',
                     'categoria_id': categoria_id
                 })
-                .success(function (data) {
-                    //console.log(data);
-                    if (data !== 'false') {
-                        CategoryVars.clearCache = true;
-                        callback(data);
-                    }
+                .then(function (data) {
+                    CategoryVars.clearCache = true;
+                    return data;
                 })
-                .error(function (data) {
-                    callback(data);
-                })
+                .catch(function (data) {
+                    CategoryVars.clearCache = true;
+                    ErrorHandler(data);
+                });
         }
 
         function save(categoria) {

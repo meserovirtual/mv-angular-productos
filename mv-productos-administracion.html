@@ -20,7 +20,8 @@
             <tbody>
             <tr ng-repeat="row in $ctrl.productos | filter:$ctrl.filtro | limitTo:$ctrl.limit:$ctrl.start"
                 ng-click="row.producto_id=''+row.producto_id;$ctrl.producto=row;$ctrl.getFotos(row.fotos);$ctrl.setCheckBox(row);
-                $ctrl.getProveedores(row.proveedores);$ctrl.detailsOpen=true;$ctrl.priceOpen=false;$ctrl.update=true;">
+                $ctrl.getProveedores(row.proveedores);$ctrl.detailsOpen=true;$ctrl.priceOpen=false;$ctrl.update=true;
+                $ctrl.showProductoCompuesto=(row.producto_tipo_id == 2) ? true : false;">
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{row.nombre}}</td>
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{row.categorias[0].nombre}}</td>
                 <td ng-class="{'row-warning':row.precios.length == 0}">{{$ctrl.getTipoProducto(row.producto_tipo_id);}}</td>

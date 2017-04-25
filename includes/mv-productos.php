@@ -54,6 +54,7 @@ class Productos extends Main
     p.en_slider,
     p.en_oferta,
     p.iva,
+    p.tiempo_espera,
     c.categoria_id,
     c.nombre nombreCategoria,
     c.parent_id,
@@ -93,7 +94,7 @@ FROM
         LEFT JOIN
     usuarios u ON u.usuario_id = pro.proveedor_id
 GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
-p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , c.categoria_id ,
+p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , p.iva, p.tiempo_espera, c.categoria_id ,
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
 pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido;');
 
@@ -114,6 +115,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                     'en_slider' => $row["en_slider"],
                     'en_oferta' => $row["en_oferta"],
                     'iva' => $row["iva"],
+                    'tiempo_espera' => $row["tiempo_espera"],
                     'categorias' => array(),
                     'precios' => array(),
                     'fotos' => array(),
@@ -299,6 +301,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
     p.en_slider,
     p.en_oferta,
     p.iva,
+    p.tiempo_espera,
     c.categoria_id,
     c.nombre nombreCategoria,
     c.parent_id,
@@ -341,7 +344,7 @@ FROM
     usuarios u ON u.usuario_id = pro.proveedor_id
 WHERE ph.hora_desde < CAST("' . date('H:i') . '" AS time) AND ph.hora_hasta > CAST("' . date('H:i') . '" AS time)    
 GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
-p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , c.categoria_id ,
+p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , p.iva, p.tiempo_espera, c.categoria_id ,
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
 pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.main, f.nombre, u.usuario_id, u.nombre, u.apellido;');
 
@@ -365,6 +368,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                     'en_slider' => $row["en_slider"],
                     'en_oferta' => $row["en_oferta"],
                     'iva' => $row["iva"],
+                    'tiempo_espera' => $row["tiempo_espera"],
                     'categorias' => array(),
                     'precios' => array(),
                     'fotos' => array(),
@@ -586,7 +590,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             'en_slider' => $product_decoded->en_slider,
             'en_oferta' => $product_decoded->en_oferta,
             'producto_tipo_id' => $product_decoded->producto_tipo_id,
-            'iva' => $product_decoded->iva
+            'iva' => $product_decoded->iva,
+            'tiempo_espera' => $product_decoded->tiempo_espera
         );
 
         $result = $db->insert('productos', $data);
@@ -942,7 +947,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             'en_slider' => $product_decoded->en_slider,
             'en_oferta' => $product_decoded->en_oferta,
             'producto_tipo_id' => $product_decoded->producto_tipo_id,
-            'iva' => $product_decoded->iva
+            'iva' => $product_decoded->iva,
+            'tiempo_espera' => $product_decoded->tiempo_espera
         );
 
         $result = $db->update('productos', $data);
@@ -1267,8 +1273,6 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
      */
     function checkProducto($producto)
     {
-
-
         $producto->nombre = (!array_key_exists("nombre", $producto)) ? '' : $producto->nombre;
         $producto->descripcion = (!array_key_exists("descripcion", $producto)) ? '' : $producto->descripcion;
         $producto->pto_repo = (!array_key_exists("pto_repo", $producto)) ? 0 : $producto->pto_repo;
@@ -1280,6 +1284,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $producto->en_oferta = (!array_key_exists("en_oferta", $producto)) ? 0 : $producto->en_oferta;
         $producto->producto_tipo_id = (!array_key_exists("producto_tipo_id", $producto)) ? 0 : $producto->producto_tipo_id;
         $producto->iva = (!array_key_exists("iva", $producto)) ? 0.0 : $producto->iva;
+        $producto->tiempo_espera = (!array_key_exists("tiempo_espera", $producto)) ? 0 : $producto->tiempo_espera;
         $producto->precios = (!array_key_exists("precios", $producto)) ? array() : self::checkPrecios($producto->precios);
         $producto->fotos = (!array_key_exists("fotos", $producto)) ? array() : self::checkFotos($producto->fotos);
         $producto->categorias = (!array_key_exists("categorias", $producto)) ? array() : self::checkCategorias($producto->categorias);

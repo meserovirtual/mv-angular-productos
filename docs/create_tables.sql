@@ -13,6 +13,7 @@ CREATE TABLE productos (
   en_oferta int(1) DEFAULT '0' COMMENT '0 - No, 1 - Si',
   producto_tipo_id int(11) DEFAULT NULL COMMENT '0 - producto / 1 - insumo / 2 - kit / 3 - Servicio',
   iva decimal(8,2) DEFAULT 0.0,
+  tiempo_espera int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (producto_id),
   KEY SKU (sku)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

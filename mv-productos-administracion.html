@@ -92,6 +92,12 @@
                 </div>
             </div>
             <div class="mv-col">
+                <div class="input" data-tip="Tiempo de espera (minutos)">
+                    <input id="tiempo_espera" type="number" ng-model="$ctrl.producto.tiempo_espera"
+                           placeholder="Tiempo de espera (minutos)" max="99999" />
+                </div>
+            </div>
+            <div class="mv-col">
                 <label class="label--checkbox" ng-click="$ctrl.en_oferta=!$ctrl.en_oferta">
                     <input type="checkbox" class="checkbox" id="check-en-oferta" ng-checked="$ctrl.en_oferta">En Oferta
                 </label>

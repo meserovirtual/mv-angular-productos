@@ -63,6 +63,8 @@ class Productos extends Main
     ps.producto_id productoKit,
     ps.producto_cantidad,
     (select nombre from productos where producto_id = ps.producto_id) nombreKit,
+    ps.opcional,
+    ps.precio,
     pr.precio_id,
     pr.precio_tipo_id,
     pr.precio,
@@ -231,7 +233,9 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                         'producto_kit_id' => $row['producto_kit_id'],
                         'nombre' => $row['nombreKit'],
                         'producto_id' => $row['productoKit'],
-                        'producto_cantidad' => $row['producto_cantidad']
+                        'producto_cantidad' => $row['producto_cantidad'],
+                        'opcional' => $row['opcional'],
+                        'precio' => $row['precio']
                     );
 
                     $have_kit = true;
@@ -242,7 +246,9 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                         'producto_kit_id' => $row['producto_kit_id'],
                         'nombre' => $row['nombreKit'],
                         'producto_id' => $row['productoKit'],
-                        'producto_cantidad' => $row['producto_cantidad']
+                        'producto_cantidad' => $row['producto_cantidad'],
+                        'opcional' => $row['opcional'],
+                        'precio' => $row['precio']
                     ));
                 }
             }
@@ -848,7 +854,9 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $data = array(
             'producto_cantidad' => $kit->producto_cantidad,
             'producto_id' => $kit->producto_id,
-            'parent_id' => $producto_id
+            'parent_id' => $producto_id,
+            'precio' => $kit->precio,
+            'opcional' => $kit->opcional
         );
 
         $kit = $db->insert('productos_kits', $data);
@@ -1307,6 +1315,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $productos_kit->producto_id = (!array_key_exists("producto_id", $productos_kit)) ? 0 : $productos_kit->producto_id;
         $productos_kit->parent_id = (!array_key_exists("parent_id", $productos_kit)) ? 0 : $productos_kit->parent_id;
         $productos_kit->producto_cantidad = (!array_key_exists("producto_cantidad", $productos_kit)) ? '' : $productos_kit->producto_cantidad;
+        $productos_kit->precio = (!array_key_exists("precio", $productos_kit)) ? '' : $productos_kit->precio;
+        $productos_kit->opcional = (!array_key_exists("opcional", $productos_kit)) ? '' : $productos_kit->opcional;
 
         return $productos_kit;
     }

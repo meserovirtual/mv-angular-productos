@@ -47,6 +47,8 @@
         StockVars.clearCache = true;
         vm.producto_para_kit = {};
         vm.productos_en_kit = [];
+        vm.precio_opcional = 0.00;
+        vm.opcional = false;
 
 
         vm.foto_01 = {nombre: 'no_image.png'};
@@ -410,9 +412,13 @@
             vm.producto.kits.push({
                 producto_cantidad: 1,
                 producto_id: vm.producto_para_kit.producto_id,
-                nombre: vm.producto_para_kit.nombre
+                nombre: vm.producto_para_kit.nombre,
+                precio: vm.precio_opcional,
+                opcional: (vm.opcional) ? 1 : 0
             });
             vm.producto_para_kit = {};
+            vm.opcional = false;
+            vm.precio_opcional = 0.00;
         }
 
 

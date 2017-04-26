@@ -158,17 +158,31 @@
                     <div class="panel-heading">Producto Compuesto</div>
                     <div class="panel-body">
                         <div class="mv-col">
-                            <div class="input" data-tip="Producto">
-                                <mv-autocomplete fields-to-show="'nombre'"
-                                                 selected-to="$ctrl.producto_para_kit"
-                                                 search-fields="'nombre,sku'"
-                                                 search-function="$ctrl.searchProductoKit(callback)"
-                                                 id="searchProducto"></mv-autocomplete>
+                            <div class="input">
+                                <div class="input" data-tip="Producto">
+                                    <mv-autocomplete fields-to-show="'nombre'"
+                                                     selected-to="$ctrl.producto_para_kit"
+                                                     search-fields="'nombre,sku'"
+                                                     search-function="$ctrl.searchProductoKit(callback)"
+                                                     id="searchProducto"></mv-autocomplete>
+                                </div>
                             </div>
-
-                            <button type="button" class="boton-ok" ng-click="$ctrl.agregarKit();" title="Guardar">
-                                <i class="fa fa-check" aria-hidden="true"></i>
-                            </button>
+                            <div class="input">
+                                <label class="label--checkbox" ng-click="$ctrl.opcional=!$ctrl.opcional">
+                                    <input type="checkbox" class="checkbox" id="check-opcional" ng-checked="$ctrl.opcional">Opcional
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mv-col">
+                            <div class="input">
+                                <input id="precio_opcional" type="number" ng-model="$ctrl.precio_opcional"
+                                       placeholder="Precio opcional" />
+                            </div>
+                            <div class="input">
+                                <button type="button" class="boton-ok" ng-click="$ctrl.agregarKit();" title="Guardar">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mv-col">

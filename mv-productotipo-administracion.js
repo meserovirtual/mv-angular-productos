@@ -30,6 +30,7 @@
         vm.compuesto = false;
         vm.status = true;
         vm.update = false;
+        vm.soloActivos = true;
 
         vm.save = save;
         vm.cancel = cancel;
@@ -50,9 +51,22 @@
         loadProductosTipo();
 
         function loadProductosTipo() {
-            ProductTypeService.get().then(function (data) {
-                setData(data);
-            });
+            ProductTypeVars.clearCache = true;
+            if (vm.soloActivos) {
+                ProductTypeVars.all = false;
+                ProductTypeService.get().then(function (data) {
+                    setData(data);
+                }).catch(function(error){
+                    console.log(error);
+                });
+            } else {
+                ProductTypeVars.all = true;
+                ProductTypeService.get().then(function (data) {
+                    setData(data);
+                }).catch(function(error){
+                    console.log(error);
+                });
+            }
         }
 
         function save() {

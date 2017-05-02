@@ -441,7 +441,8 @@
          * @returns {*}
          */
         function get() {
-            var urlGet = url + '?function=getCategorias';
+            //var urlGet = url + '?function=getCategorias';
+            var urlGet = url + '?function=getCategorias&all=' + CategoryVars.all;
             var $httpDefaultCache = $cacheFactory.get('$http');
             var cachedData = [];
             MvUtilsGlobals.startWaiting();
@@ -677,7 +678,7 @@
         // Registro inicial, no es p�gina, es el registro
         this.start = 0;
 
-
+        this.all = false;
         // Indica si se debe limpiar el cach� la pr�xima vez que se solicite un get
         this.clearCache = true;
 
@@ -1159,7 +1160,8 @@
          * @returns {*}
          */
         function get() {
-            var urlGet = url + '?function=getProductosTipos';
+            //var urlGet = url + '?function=getProductosTipos';
+            var urlGet = url + '?function=getProductosTipos&all=' + ProductTypeVars.all;
             var $httpDefaultCache = $cacheFactory.get('$http');
             var cachedData = [];
             MvUtilsGlobals.startWaiting();
@@ -1381,7 +1383,7 @@
         // Registro inicial, no es pagina, es el registro
         this.start = 0;
 
-
+        this.all = false;
         // Indica si se debe limpiar el cache la proxima vez que se solicite un get
         this.clearCache = true;
 

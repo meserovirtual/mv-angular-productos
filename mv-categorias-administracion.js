@@ -27,6 +27,7 @@
         vm.detailsOpen = false;
         vm.status = true;
         vm.update = false;
+        vm.soloActivos = true;
 
         vm.save = save;
         vm.cancel = cancel;
@@ -48,9 +49,26 @@
         loadCategorias();
 
         function loadCategorias() {
-            CategoryService.get().then(function (data) {
-                setData(data);
-            });
+            /*
+             CategoryService.get().then(function (data) {
+             setData(data);
+             });*/
+            CategoryVars.clearCache = true;
+            if (vm.soloActivos) {
+                CategoryVars.all = false;
+                CategoryService.get().then(function (data) {
+                    setData(data);
+                }).catch(function(error){
+                    console.log(error);
+                });
+            } else {
+                CategoryVars.all = true;
+                CategoryService.get().then(function (data) {
+                    setData(data);
+                }).catch(function(error){
+                    console.log(error);
+                });
+            }
         }
 
         function save() {
@@ -91,7 +109,6 @@
         }
 
         function setData(data) {
-            console.log('Cargo de nuevo categorias');
             vm.categorias = data;
             vm.paginas = CategoryVars.paginas;
         }

@@ -545,20 +545,32 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
     /**
      * @descr Obtiene las categorias
      */
-    function getCategorias()
+    //function getCategorias()
+    function getCategorias($params)
     {
+        if($params["all"] == "false")
+            $status = " WHERE c.status = 1";
+        else
+            $status = "";
+
         $db = self::$instance->db;
-        $results = $db->rawQuery('SELECT c.*, (select count(producto_id) from productos_categorias p where p.categoria_id= c.categoria_id) total, d.nombre nombrePadre FROM categorias c LEFT JOIN categorias d ON c.parent_id = d.categoria_id;');
+        $results = $db->rawQuery('SELECT c.*, (select count(producto_id) from productos_categorias p where p.categoria_id= c.categoria_id) total, d.nombre nombrePadre FROM categorias c LEFT JOIN categorias d ON c.parent_id = d.categoria_id ' . $status . ';');
         echo json_encode($results);
     }
 
     /**
      *
      */
-    function getProductosTipos()
+    //function getProductosTipos()
+    function getProductosTipos($params)
     {
+        if($params["all"] == "false")
+            $status = " WHERE status = 1";
+        else
+            $status = "";
+
         $db = self::$instance->db;
-        $results = $db->rawQuery('SELECT producto_tipo_id, nombre, disponible_para_venta, control_stock, compuesto, status FROM productos_tipo;');
+        $results = $db->rawQuery('SELECT producto_tipo_id, nombre, disponible_para_venta, control_stock, compuesto, status FROM productos_tipo ' . $status . ';');
         echo json_encode($results);
     }
 

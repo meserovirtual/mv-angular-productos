@@ -14,12 +14,12 @@
         }
     }
 
-    MvCategoriasController.$inject = ['CategoryVars', 'CategoryService', "MvUtils"];
+    MvCategoriasController.$inject = ['CategoryVars', 'CategoryService', "MvUtils", "ProductService"];
     /**
      * @param AcUsuarios
      * @constructor
      */
-    function MvCategoriasController(CategoryVars, CategoryService, MvUtils) {
+    function MvCategoriasController(CategoryVars, CategoryService, MvUtils, ProductService) {
         var vm = this;
 
         vm.categorias = [];
@@ -28,6 +28,7 @@
         vm.status = true;
         vm.update = false;
         vm.soloActivos = true;
+        vm.productos = [];
 
         vm.save = save;
         vm.cancel = cancel;
@@ -87,6 +88,25 @@
             } else {
                 vm.categoria.status = vm.status ? 1 : 0;
             }
+
+            if(vm.categoria.status == 0) {
+                ProductService.getByCategoria(vm.categoria.categoria_id).then(function(data){
+                    vm.productos = data;
+                    if(data.length > 0) {
+                        MvUtils.showMessage('warning', 'Categoria con productos asociados. No se puede deshabilitar');
+                        return;
+                    } else {
+                        saveCategoria();
+                    }
+                }).catch(function(error){
+                    console.log(error);
+                });
+            } else {
+                saveCategoria();
+            }
+        }
+
+        function saveCategoria() {
             CategoryService.save(vm.categoria).then(function (data) {
                 //vm.detailsOpen = (data === undefined || data < 0) ? true : false;
                 vm.detailsOpen = data.error;
@@ -96,16 +116,16 @@
                 }
                 else {
                     vm.categoria = {};
+                    vm.productos = [];
                     loadCategorias();
                     element[0].classList.remove('error-input');
                     MvUtils.showMessage('success', data.message);
                 }
             })
-            .catch(function (data) {
-                vm.categoria = {};
-                vm.detailsOpen = true;
-            });
-
+                .catch(function (data) {
+                    vm.categoria = {};
+                    vm.detailsOpen = true;
+                });
         }
 
         function setData(data) {
@@ -121,6 +141,7 @@
                 if(result) {
                     CategoryService.remove(vm.categoria.categoria_id).then(function(data){
                         vm.categoria = {};
+                        vm.productos = [];
                         vm.detailsOpen = false;
                         loadCategorias();
                         MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
@@ -132,13 +153,13 @@
         }
 
         /*
-        function cleanCategoria() {
-            vm.categoria = {};
-            vm.status = false;
-            vm.update = false;
-            element[0].classList.remove('error-input');
-        }
-        */
+         function cleanCategoria() {
+         vm.categoria = {};
+         vm.status = false;
+         vm.update = false;
+         element[0].classList.remove('error-input');
+         }
+         */
 
         function omitirAcentos(texto) {
             return MvUtils.omitirAcentos(texto);
@@ -147,6 +168,7 @@
         function cancel() {
             vm.categorias = [];
             vm.categoria={};
+            vm.productos = [];
             vm.detailsOpen = false;
             vm.status = false;
             vm.update = false;

@@ -272,20 +272,24 @@
          * @param categoria_id
          * @param callback
          */
-        function getByCategoria(categoria_id, callback) {
+        function getByCategoria(categoria_id) {
             var productos = [];
-            get(function (data) {
+
+            return get().then(function (data) {
                 if (data == undefined || data.length == 0)
-                    return callback(productos);
+                    return productos;
 
                 data.forEach(function (producto) {
                     if (producto === undefined || producto.categorias === undefined || producto.categorias.length == 0)
-                        return callback(productos);
+                        return productos;
 
                     if (categoria_id == producto.categorias[0].categoria_id)
                         productos.push(producto);
                 });
-                return callback(productos);
+                return productos;
+
+            }).then(function (data) {
+                return data;
             });
         }
 

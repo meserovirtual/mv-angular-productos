@@ -88,7 +88,8 @@
          */
         function get() {
             MvUtilsGlobals.startWaiting();
-            var urlGet = url + '?function=getProductos';
+            //var urlGet = url + '?function=getProductos';
+            var urlGet = url + '?function=getProductos&all=' + ProductVars.all;
             var $httpDefaultCache = $cacheFactory.get('$http');
             var cachedData = [];
 
@@ -409,7 +410,7 @@
         // Registro inicial, no es p�gina, es el registro
         this.start = 0;
 
-
+        this.all = false;
         // Indica si se debe limpiar el cach� la pr�xima vez que se solicite un get
         this.clearCache = true;
 

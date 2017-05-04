@@ -49,6 +49,7 @@
         vm.productos_en_kit = [];
         vm.precio_opcional = 0.00;
         vm.opcional = false;
+        vm.soloActivos = true;
 
 
         vm.foto_01 = {nombre: 'no_image.png'};
@@ -113,8 +114,13 @@
         loadProductos();
 
         function loadProductos() {
+            ProductVars.clearCache = true;
+            ProductVars.all = (vm.soloActivos) ? false : true;
+
             ProductService.get().then(function (data) {
                 setData(data);
+            }).catch(function(error){
+                console.log(error);
             });
         }
 

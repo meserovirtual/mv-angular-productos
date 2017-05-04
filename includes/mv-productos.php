@@ -38,8 +38,14 @@ class Productos extends Main
      * @description: Obtiene todos los usuario con sus direcciones.
      * todo: Sacar dirección y crear sus propias clases dentro de este mismo módulo.
      */
-    function getProductos()
+    //function getProductos()
+    function getProductos($params)
     {
+        if($params["all"] == "false")
+            $status = " WHERE p.status = 1";
+        else
+            $status = "";
+
         $db = self::$instance->db;
         $results = $db->rawQuery('SELECT
     p.producto_id,
@@ -58,7 +64,7 @@ class Productos extends Main
     c.categoria_id,
     c.nombre nombreCategoria,
     c.parent_id,
-    c.status,
+    c.status statusCategoria,
     ps.producto_kit_id,
     ps.producto_id productoKit,
     ps.producto_cantidad,
@@ -95,6 +101,7 @@ FROM
     productos_proveedores pro ON pro.producto_id = p.producto_id
         LEFT JOIN
     usuarios u ON u.usuario_id = pro.proveedor_id
+'. $status .'
 GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
 p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , p.iva, p.tiempo_espera, c.categoria_id ,
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
@@ -139,7 +146,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                         'categoria_id' => $row['categoria_id'],
                         'nombre' => $row['nombreCategoria'],
                         'parent_id' => $row['parent_id'],
-                        'status' => $row['status']
+                        'status' => $row['statusCategoria']
                     );
 
                     $have_cat = true;
@@ -150,7 +157,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                         'categoria_id' => $row['categoria_id'],
                         'nombre' => $row['nombreCategoria'],
                         'parent_id' => $row['parent_id'],
-                        'status' => $row['status']
+                        'status' => $row['statusCategoria']
                     ));
                 }
             }

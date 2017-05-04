@@ -23,7 +23,7 @@
             <tbody>
             <tr ng-repeat="row in $ctrl.productosTipo | filter:$ctrl.filtro | limitTo:$ctrl.limit:$ctrl.start"
                 ng-click="row.producto_tipo_id=''+row.producto_tipo_id;$ctrl.productoTipo=row;$ctrl.detailsOpen=true;
-                $ctrl.setCheckBox($ctrl.productoTipo);$ctrl.update=true;">
+                $ctrl.setCheckBox($ctrl.productoTipo);$ctrl.update=true;$ctrl.productos=[];$ctrl.showProducto=false">
                 <td class="">{{row.nombre}}</td>
                 <td class="">{{row.disponible_para_venta == 0 ? 'N' : 'S'}}</td>
                 <td class="">{{row.status == 0 ? 'N' : 'S'}}</td>
@@ -85,6 +85,20 @@
                 <label class="label--checkbox" ng-click="$ctrl.status=!$ctrl.status" ng-if="$ctrl.update">
                     <input type="checkbox" class="checkbox" id="check-status" ng-checked="$ctrl.status">Activo
                 </label>
+            </div>
+            <div class="mv-col">
+                <button type="button" class="boton-calendario" ng-if="$ctrl.productos.length > 0"
+                        ng-click="$ctrl.showProducto=!$ctrl.showProducto;" title="Info">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </button>
+            </div>
+            <h2 ng-if="$ctrl.showProducto==true">Productos asociados</h2>
+            <div class="mv-col" ng-if="$ctrl.showProducto==true">
+                <div style="width: 95%" class="input">
+                    <div ng-repeat="producto in $ctrl.productos">
+                        {{producto.nombre}}
+                    </div>
+                </div>
             </div>
 
             <div class="botonera">

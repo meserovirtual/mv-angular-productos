@@ -137,20 +137,36 @@
             if(vm.categoria.categoria_id == undefined) {
                 alert('Debe seleccionar una categoria');
             } else {
-                var result = confirm('¿Esta seguro que desea eliminar la categoria seleccionada?');
-                if(result) {
-                    CategoryService.remove(vm.categoria.categoria_id).then(function(data){
-                        vm.categoria = {};
-                        vm.productos = [];
-                        vm.detailsOpen = false;
-                        loadCategorias();
-                        MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
-                    }).catch(function(data){
-                        console.log(data);
-                    });
-                }
+                ProductService.getByCategoria(vm.categoria.categoria_id).then(function(data){
+                    vm.productos = data;
+                    if(data.length > 0) {
+                        MvUtils.showMessage('warning', 'Categoria con productos asociados. No se puede borrar');
+                        return;
+                    } else {
+                        removeCategoria();
+                    }
+                }).catch(function(error){
+                    console.log(error);
+                });
             }
         }
+
+
+        function removeCategoria() {
+            var result = confirm('¿Esta seguro que desea eliminar la categoria seleccionada?');
+            if(result) {
+                CategoryService.remove(vm.categoria.categoria_id).then(function(data){
+                    vm.categoria = {};
+                    vm.productos = [];
+                    vm.detailsOpen = false;
+                    loadCategorias();
+                    MvUtils.showMessage('success', 'El registro se borro satisfactoriamente');
+                }).catch(function(data){
+                    console.log(data);
+                });
+            }
+        }
+
 
         /*
          function cleanCategoria() {

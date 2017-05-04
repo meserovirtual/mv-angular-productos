@@ -14,12 +14,12 @@
         }
     }
 
-    MvProductoTipoController.$inject = ['ProductTypeVars', 'ProductTypeService', "MvUtils"];
+    MvProductoTipoController.$inject = ['ProductTypeVars', 'ProductTypeService', "MvUtils", "ProductService"];
     /**
      * @param AcUsuarios
      * @constructor
      */
-    function MvProductoTipoController(ProductTypeVars, ProductTypeService, MvUtils) {
+    function MvProductoTipoController(ProductTypeVars, ProductTypeService, MvUtils, ProductService) {
         var vm = this;
 
         vm.productosTipo = [];
@@ -31,6 +31,7 @@
         vm.status = true;
         vm.update = false;
         vm.soloActivos = true;
+        vm.productos = [];
 
         vm.save = save;
         vm.cancel = cancel;
@@ -89,6 +90,24 @@
             vm.productoTipo.control_stock = vm.control_stock ? 1 : 0;
             vm.productoTipo.compuesto = vm.compuesto ? 1 : 0;
 
+            if(vm.productoTipo.status == 0) {
+                ProductService.getByParams("producto_tipo_id",""+vm.productoTipo.producto_tipo_id,"true").then(function(data){
+                    vm.productos = data;
+                    if(data.length > 0) {
+                        MvUtils.showMessage('warning', 'Tipo de Producto con productos asociados. No se puede deshabilitar');
+                        return;
+                    } else {
+                        saveProductType();
+                    }
+                }).catch(function(error){
+                    console.log(error);
+                });
+            } else {
+                saveProductType();
+            }
+        }
+
+        function saveProductType() {
             ProductTypeService.save(vm.productoTipo).then(function (data) {
                 vm.detailsOpen = data.error;
                 if(data.error) {
@@ -101,12 +120,10 @@
                     element[0].classList.remove('error-input');
                     MvUtils.showMessage('success', data.message);
                 }
-            })
-            .catch(function (data) {
+            }).catch(function (data) {
                 vm.productoTipo = {};
                 vm.detailsOpen = true;
             });
-
         }
 
         function setData(data) {
@@ -118,15 +135,29 @@
             if(vm.productoTipo.producto_tipo_id == undefined) {
                 alert('Debe seleccionar un tipo de producto');
             } else {
-                var result = confirm('¿Esta seguro que desea eliminar el registro seleccionada?');
-                if(result) {
-                    ProductTypeService.remove(vm.productoTipo.producto_tipo_id, function(data){
-                        vm.productoTipo = {};
-                        vm.detailsOpen = false;
-                        loadProductosTipo();
-                        MvUtils.showMessage('success', 'La registro se borro satisfactoriamente');
-                    });
-                }
+                ProductService.getByParams("producto_tipo_id",""+vm.productoTipo.producto_tipo_id,"true").then(function(data){
+                    vm.productos = data;
+                    if(data.length > 0) {
+                        MvUtils.showMessage('warning', 'Tipo de Producto con productos asociados. No se puede borrar');
+                        return;
+                    } else {
+                        removeProductType();
+                    }
+                }).catch(function(error){
+                    console.log(error);
+                });
+            }
+        }
+
+        function removeProductType() {
+            var result = confirm('¿Esta seguro que desea eliminar el registro seleccionada?');
+            if(result) {
+                ProductTypeService.remove(vm.productoTipo.producto_tipo_id, function(data){
+                    vm.productoTipo = {};
+                    vm.detailsOpen = false;
+                    loadProductosTipo();
+                    MvUtils.showMessage('success', 'El registro se borro satisfactoriamente');
+                });
             }
         }
 

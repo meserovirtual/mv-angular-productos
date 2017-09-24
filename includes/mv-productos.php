@@ -42,9 +42,9 @@ class Productos extends Main
     function getProductos($params)
     {
         if($params["all"] == "false")
-            $status = " WHERE p.status = 1";
+            $status = " WHERE p.status = 1 and p.empresa_id = " . getEmpresa();
         else
-            $status = "";
+            $status = " WHERE p.empresa_id = " . getEmpresa();
 
         $db = self::$instance->db;
         $results = $db->rawQuery('SELECT
@@ -355,7 +355,7 @@ FROM
     productos_proveedores pro ON pro.producto_id = p.producto_id
         LEFT JOIN
     usuarios u ON u.usuario_id = pro.proveedor_id
-WHERE ph.hora_desde < CAST("' . date('H:i') . '" AS time) AND ph.hora_hasta > CAST("' . date('H:i') . '" AS time)    
+WHERE ph.hora_desde < CAST("' . date('H:i') . '" AS time) AND ph.hora_hasta > CAST("' . date('H:i') . '" AS time) and p.empresa_id = ' . getEmpresa() . '   
 GROUP BY p.producto_id , p.nombre , p.descripcion , p.pto_repo , p.sku , p.status ,
 p.vendidos , p.destacado , p.producto_tipo_id , p.en_slider , p.en_oferta , p.iva, p.tiempo_espera, c.categoria_id ,
 c.nombre , c.parent_id , ps.producto_kit_id , ps.producto_id , ps.producto_cantidad , pr.precio_id , pr.precio_tipo_id ,
@@ -561,7 +561,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             $status = "";
 
         $db = self::$instance->db;
-        $results = $db->rawQuery('SELECT c.*, (select count(producto_id) from productos_categorias p where p.categoria_id= c.categoria_id) total, d.nombre nombrePadre FROM categorias c LEFT JOIN categorias d ON c.parent_id = d.categoria_id ' . $status . ';');
+        $results = $db->rawQuery('SELECT c.*, (select count(producto_id) from productos_categorias p where  p.empresa_id = ' . getEmpresa() . ' and p.categoria_id= c.categoria_id) total, d.nombre nombrePadre FROM categorias c LEFT JOIN categorias d ON c.parent_id = d.categoria_id ' . $status . ';');
         echo json_encode($results);
     }
 
@@ -572,9 +572,9 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
     function getProductosTipos($params)
     {
         if($params["all"] == "false")
-            $status = " WHERE status = 1";
+            $status = " WHERE status = 1 and empresa_id = " . getEmpresa() ;
         else
-            $status = "";
+            $status = "where empresa_id = " . getEmpresa() ;
 
         $db = self::$instance->db;
         $results = $db->rawQuery('SELECT producto_tipo_id, nombre, disponible_para_venta, control_stock, compuesto, status FROM productos_tipo ' . $status . ';');
@@ -591,7 +591,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $db = self::$instance->db;
         $product_decoded = self::checkProducto(json_decode($params["producto"]));
 
-        $SQL = 'Select producto_id from productos where nombre ="' . $product_decoded->nombre . '"';
+        $SQL = 'Select producto_id from productos where nombre ="' . $product_decoded->nombre . ' and empresa_id = ' . getEmpresa() . '"';
 
         $result = $db->rawQuery($SQL);
 
@@ -616,7 +616,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             'en_oferta' => $product_decoded->en_oferta,
             'producto_tipo_id' => $product_decoded->producto_tipo_id,
             'iva' => $product_decoded->iva,
-            'tiempo_espera' => $product_decoded->tiempo_espera
+            'tiempo_espera' => $product_decoded->tiempo_espera,
+            'empresa_id' => getEmpresa()
         );
 
         $result = $db->insert('productos', $data);
@@ -764,7 +765,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
     {
         $data = array(
             'categoria_id' => $categoria->categoria_id,
-            'producto_id' => $producto_id
+            'producto_id' => $producto_id,
+            'empresa_id' => getEmpresa()
         );
 
         $cat = $db->insert('productos_categorias', $data);
@@ -781,7 +783,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $error = false;
         $message = '';
 
-        $SQL = 'Select categoria_id from categorias where nombre ="' . $categoria_decoded->nombre . '"';
+        $SQL = 'Select categoria_id from categorias where nombre ="' . $categoria_decoded->nombre . '" and empresa_id = ' . getEmpresa() ;
         $db->rawQuery($SQL);
 
         if ($db->count > 0) {
@@ -854,7 +856,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
     {
         $data = array(
             'proveedor_id' => $proveedor->proveedor_id,
-            'producto_id' => $producto_id
+            'producto_id' => $producto_id,
+            'empresa_id' => getEmpresa()
         );
 
         $pro = $db->insert('productos_proveedores', $data);
@@ -875,7 +878,8 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
             'producto_id' => $kit->producto_id,
             'parent_id' => $producto_id,
             'precio' => $kit->precio,
-            'opcional' => $kit->opcional
+            'opcional' => $kit->opcional,
+            'empresa_id' => getEmpresa()
         );
 
         $kit = $db->insert('productos_kits', $data);
@@ -892,7 +896,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
         $error = false;
         $message = '';
 
-        $SQL = 'Select producto_tipo_id from productos_tipo where nombre ="' . $producto_tipo_decoded->nombre . '"';
+        $SQL = 'Select producto_tipo_id from productos_tipo where nombre ="' . $producto_tipo_decoded->nombre . '" and empresa_id = ' . getEmpresa() ;
         $db->rawQuery($SQL);
 
         if ($db->count > 0) {
@@ -914,6 +918,7 @@ pr.precio, ph.horario_id, ph.hora_desde, ph.hora_hasta, f.producto_foto_id, f.ma
                 'control_stock' => $producto_tipo_decoded->control_stock,
                 'compuesto' => $producto_tipo_decoded->compuesto,
                 'status' => $producto_tipo_decoded->status,
+                'empresa_id' => getEmpresa()
             );
 
             $result = $db->insert('productos_tipo', $data);
